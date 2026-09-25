@@ -1,26 +1,174 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* True neutral-grey scale, all derived from the brand emerald's hue (~166°)
+     at low saturation — mirrors cylib's own near-achromatic greys instead of
+     generic UI grey. See the plan doc for the derivation. */
+  --grey-50: #f4f5f5;
+  --grey-100: #e4e7e6;
+  --grey-200: #c8d0ce;
+  --grey-400: #9fadaa;
+  --grey-600: #677e79;
+  --grey-800: #3f504c;
+  --grey-900: #1a2321;
+
+  /* Brand emerald — used only in small deliberate moments (CTA, links, one
+     accent card, the closing band), never smeared across whole backgrounds. */
+  --brand: #00674f;
+  --brand-hover: #00a37d;
+  --brand-deep: #0a241c;
+  --brand-deep-2: #153b2f;
+
+  /* Rare accent — triadic harmony partner to the brand hue (~166° - 120° =
+     46°, true amber). Used as sparingly as cylib uses its own tan/coral. */
+  --gold: #ddb73c;
+
+  --surface: #ffffff;
+  --ink: var(--grey-900);
+  --body-c: var(--grey-600);
+
+  /* Pale yellow-green — scoped to the ProcessLoop section's own gradient. */
+  --surface-yellow: #eff8ce;
+
+  /* Warm ivory — scoped to the ProcessLoop (gif/diagram) section. */
+  --surface-ivory: #faf7f0;
+
+  /* Warm mineral off-white — the Impact section's editorial-composition
+     base (replaces the old flat surface-yellow background; exact hex
+     specified by the creative-direction brief). */
+  --surface-mineral: #f3f1e8;
+
+  /* Warm stone — scoped to the Products section. */
+  --surface-stone: #edede4;
+
+  /* Light emerald — a pale tint of the brand hue itself (not a new colour),
+     scoped to the Engineered Energy carousel. */
+  --surface-emerald: #dcf1e6;
+  --surface-emerald-deep: #c3e6d3;
+
+  /* Recognition (certifications/awards) section — an extremely gradual
+     4-stop flow from warm mineral/stone down into soft green-grey (small
+     deltas between each stop on purpose, so the transition itself is
+     imperceptible step to step). --surface-clay stays the top stop
+     specifically (used as a solid colour for the notch-fill wrapper above
+     this section — that technique needs a flat colour, not a gradient, to
+     look right at the small corner notch). */
+  --surface-clay: #d8d5c8;
+  --surface-clay-mid: #cdd0c4;
+  --surface-clay-mid-2: #c1c9bc;
+  --surface-clay-deep: #b5c2b4;
+
+  /* The ReBAT Edit (newsroom) section background. */
+  --surface-edit: #f4f4f1;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-grey-50: var(--grey-50);
+  --color-grey-100: var(--grey-100);
+  --color-grey-200: var(--grey-200);
+  --color-grey-400: var(--grey-400);
+  --color-grey-600: var(--grey-600);
+  --color-grey-800: var(--grey-800);
+  --color-grey-900: var(--grey-900);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-deep-2: var(--brand-deep-2);
+  --color-gold: var(--gold);
+
+  --color-surface: var(--surface);
+  --color-surface-yellow: var(--surface-yellow);
+  --color-surface-mineral: var(--surface-mineral);
+  --color-surface-ivory: var(--surface-ivory);
+  --color-surface-stone: var(--surface-stone);
+  --color-surface-emerald: var(--surface-emerald);
+  --color-surface-emerald-deep: var(--surface-emerald-deep);
+  --color-surface-clay: var(--surface-clay);
+  --color-surface-clay-mid: var(--surface-clay-mid);
+  --color-surface-clay-mid-2: var(--surface-clay-mid-2);
+  --color-surface-clay-deep: var(--surface-clay-deep);
+  --color-surface-edit: var(--surface-edit);
+  --color-ink: var(--ink);
+  --color-body: var(--body-c);
+
+  --font-sans: var(--font-hanken);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--surface);
+  color: var(--body-c);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+/* Matches cylib's own tab-switch timing: 300ms fade in, 100ms fade out. */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Periodic table entrance — each cell pops in on its own stagger delay
+   (set inline per-cell), giving the whole field a diagonal "wave" rather
+   than a flat fade. */
+@keyframes cellIn {
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Slow breathing glow on the periodic table's recovered-element tiles —
+   marks them as "alive" at rest, not only on hover/active. */
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(0, 103, 79, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 12px 3px rgba(0, 103, 79, 0.35);
+  }
+}
+
+/* Slow ambient drift for the Products section's background wash — large,
+   slow, smooth movement so it reads as alive without ever being distracting
+   (a full cycle takes over half a minute). */
+@keyframes washDrift {
+  0% {
+    transform: translate(-6%, -4%) scale(1);
+  }
+  50% {
+    transform: translate(6%, 5%) scale(1.15);
+  }
+  100% {
+    transform: translate(-6%, -4%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

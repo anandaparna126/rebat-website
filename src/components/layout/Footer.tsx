@@ -1,0 +1,74 @@
+import { ContactButton } from "@/components/ui/ContactButton";
+import { Mark } from "@/components/mark/Mark";
+import { Grain } from "@/components/ui/Grain";
+import { NAV_LINKS, VALUE_CHAIN_SOURCES } from "@/lib/content";
+
+export function Footer() {
+  return (
+    // Same rounded-corner notch-fill technique as the rest of the site:
+    // wrapped in the colour of the section above it (GetInTouch, brand
+    // emerald) so the rounded-top notch reveals that instead of a flat
+    // seam where the photo background begins.
+    <div className="bg-brand">
+    <footer className="relative overflow-hidden rounded-t-[32px] bg-cover bg-center px-[5vw] pt-[120px]" style={{ backgroundImage: "url(/images/footer-bg.webp)" }}>
+      <Grain opacity={0.05} />
+
+      <div className="relative mb-16 flex flex-wrap items-start justify-between gap-10">
+        <Mark size={28} color="#ffffff" />
+
+        {/* Column layout matching cylib's own footer — main nav plus the 3
+            real value-chain pages (mirrors cylib's own Recycle with us
+            sub-links, now that those pages actually exist). No further
+            sub-links invented for About us / Products / Newsroom since we
+            don't have separate pages/sections for those yet. */}
+        <div className="grid grid-cols-2 gap-x-12 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="text-sm font-semibold text-white/90 transition-colors hover:text-white"
+            >
+              {link.label}
+            </a>
+          ))}
+          {VALUE_CHAIN_SOURCES.map((source) => (
+            <a
+              key={source.id}
+              href={`/${source.slug}`}
+              className="text-sm text-white/60 transition-colors hover:text-white"
+            >
+              {source.title}
+            </a>
+          ))}
+        </div>
+
+        <ContactButton />
+      </div>
+
+      <div className="relative mb-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/40">
+        <span>&copy; {new Date().getFullYear()} ReBAT</span>
+        <span className="flex gap-3">
+          <a href="/imprint" className="transition-colors hover:text-white">Imprint</a>
+          <a href="/privacy-policy" className="transition-colors hover:text-white">Privacy</a>
+        </span>
+      </div>
+
+      {/* Giant wordmark lockup, centered — near edge-to-edge width, same
+          20vw font-size as before. Now bottom-flush and cropped at the top
+          instead of shown in full: a fixed, short container clips
+          whatever exceeds it, and `items-end` keeps the visible slice
+          pinned to the footer's own bottom edge rather than floating with
+          empty space beneath it — this is what keeps the footer short at
+          this font-size, matching cylib's own footer wordmark mechanism. */}
+      <div className="relative flex h-[9vw] min-h-[75px] items-end justify-center overflow-hidden select-none">
+        <div
+          className="leading-none"
+          style={{ fontSize: "10vw", fontFamily: "var(--font-rounded)", color: "#F2F1E9" }}
+        >
+          ReBAT
+        </div>
+      </div>
+    </footer>
+    </div>
+  );
+}
