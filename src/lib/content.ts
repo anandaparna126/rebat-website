@@ -130,8 +130,6 @@ export interface LoopNode {
   id: string;
   label: string;
   sublabel?: string;
-  x: number;
-  y: number;
 }
 
 export interface LoopEdge {
@@ -144,25 +142,21 @@ export interface LoopEdge {
 // the real process: collection center -> reverse logistics -> factory ->
 // characterisation/test -> [recycling / refurbishment] -> ... -> customers,
 // looping back to the collection center. Nothing invented beyond what was
-// described directly.
-// x-columns are 180 apart (150px box + a 30px gap) by default, matching
-// ProcessLoop's NODE_WIDTH — except the two hops that carry an edge label
-// ("Reverse Logistics...", "Black Mass" below), which get an extra 90px so
-// the label pill has room to sit in the gap instead of overlapping the
-// node boxes on either side (see ProcessLoop.tsx's own comment on this).
+// described directly. Where each node sits on screen is presentation, not
+// content — see ProcessLoop.tsx's LAYOUT.
 export const LOOP_NODES: LoopNode[] = [
-  { id: "collection", label: "Collection Center", sublabel: "Organized (OEMs) + Unorganized (Scrap Dealers)", x: 20, y: 90 },
-  { id: "factory", label: "ReBAT Factory", x: 290, y: 90 },
-  { id: "characterisation", label: "Characterisation / Test", sublabel: "ReBAT Hitech Lab", x: 470, y: 90 },
-  { id: "recycling", label: "Recycling Plant", sublabel: "Battery Scrap Processing", x: 650, y: 30 },
-  { id: "refurb", label: "Refurbished Batteries", sublabel: "Reconditioning", x: 650, y: 150 },
-  { id: "extraction", label: "Critical Mineral Extraction Plant", sublabel: "Lithium, Cobalt, Nickel, etc.", x: 920, y: 30 },
-  { id: "packmaker", label: "Battery Pack Manufacturing Plant", sublabel: "Assemble Battery Packs", x: 920, y: 150 },
-  { id: "quality", label: "Quality Check Control", x: 1100, y: 30 },
-  { id: "testing", label: "Testing", x: 1100, y: 150 },
-  { id: "cellmaker", label: "Cell Manufacturer", sublabel: "Cells", x: 1280, y: 30 },
-  { id: "customers", label: "Customers", sublabel: "EV Battery Buyers", x: 1280, y: 150 },
-  { id: "used", label: "Used Batteries", sublabel: "Back to Collection", x: 650, y: 260 },
+  { id: "collection", label: "Collection Center", sublabel: "Organized (OEMs) + Unorganized (Scrap Dealers)" },
+  { id: "factory", label: "ReBAT Factory" },
+  { id: "characterisation", label: "Characterisation / Test", sublabel: "ReBAT Hitech Lab" },
+  { id: "recycling", label: "Recycling Plant", sublabel: "Battery Scrap Processing" },
+  { id: "refurb", label: "Refurbished Batteries", sublabel: "Reconditioning" },
+  { id: "extraction", label: "Critical Mineral Extraction Plant", sublabel: "Lithium, Cobalt, Nickel, etc." },
+  { id: "packmaker", label: "Battery Pack Manufacturing Plant", sublabel: "Assemble Battery Packs" },
+  { id: "quality", label: "Quality Check Control" },
+  { id: "testing", label: "Testing" },
+  { id: "cellmaker", label: "Cell Manufacturer", sublabel: "Cells" },
+  { id: "customers", label: "Customers", sublabel: "EV Battery Buyers" },
+  { id: "used", label: "Used Batteries", sublabel: "Back to Collection" },
 ];
 
 export const LOOP_EDGES: LoopEdge[] = [
