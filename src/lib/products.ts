@@ -14,6 +14,11 @@ export interface RecycledMaterial {
    * device, not a claim about purity or form. */
   tag: string;
   image: string;
+  /** CSS object-position for `image` — every photo here is a tall portrait
+   * shot cropped into a square/hex frame, so the mound doesn't always sit
+   * dead-centre in frame; this lets a slide shift the crop window instead
+   * of the default 50% 50% cutting off part of the pile. */
+  imagePosition?: string;
   /** The material's own real, described physical colour (brochure-sourced,
    * e.g. lithium compounds = white powder) — never an invented brand hue. */
   color: string;
@@ -99,6 +104,9 @@ export const RECYCLED_MATERIALS: RecycledMaterial[] = [
     name: "Nickel",
     tag: "Ni",
     image: "/images/products/recovered/nickel.webp",
+    // The mound sits lower in this particular photo than the other
+    // materials' shots — centring the crop (the default) cut its base off.
+    imagePosition: "center 70%",
     color: "linear-gradient(155deg, #14d9c4, #0a6b60)",
     glow: "#14d9c4",
     textOn: "light",

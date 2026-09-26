@@ -85,7 +85,10 @@ function PhotoLayer({
           src={material.image}
           alt={material.name}
           className="h-full w-full object-cover transition-[filter] duration-700"
-          style={{ filter: engineered ? "grayscale(0.55) contrast(1.15) brightness(0.85)" : "none" }}
+          style={{
+            filter: engineered ? "grayscale(0.55) contrast(1.15) brightness(0.85)" : "none",
+            objectPosition: material.imagePosition ?? "center",
+          }}
         />
         {engineered && (
           <div

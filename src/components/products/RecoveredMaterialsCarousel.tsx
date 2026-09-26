@@ -133,6 +133,7 @@ export function RecoveredMaterialsCarousel({
               animate={{ opacity: 1 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
               className="absolute inset-0 h-full w-full object-cover"
+              style={{ objectPosition: material.imagePosition ?? "center" }}
             />
           </div>
 
