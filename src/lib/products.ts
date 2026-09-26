@@ -55,6 +55,9 @@ export const RECYCLED_MATERIALS: RecycledMaterial[] = [
     name: "Black Mass",
     tag: "—",
     image: "/images/products/recovered/black-mass.webp",
+    // The pile sits lower in this photo (on a petri dish) than the other
+    // materials' shots — centring the crop (the default) cut its base off.
+    imagePosition: "center 73%",
     color: "linear-gradient(155deg, #2a2a28, #050505)",
     glow: "#2a2a28",
     textOn: "light",
