@@ -182,15 +182,18 @@ export default function AboutUs() {
         <Reveal className="relative mx-auto flex max-w-[720px] flex-col items-center text-center">
           <div className="mb-3 text-xs font-medium tracking-[0.08em] text-white/50 uppercase">Leadership</div>
           <div
-            className="mb-6 h-56 w-56 overflow-hidden rounded-full ring-4 ring-white/10 sm:h-64 sm:w-64"
+            className="mb-6 w-full max-w-md overflow-hidden rounded-[28px] ring-4 ring-white/10 sm:max-w-xl"
             style={{ background: "linear-gradient(155deg, var(--brand-hover), var(--brand-deep))" }}
           >
+            {/* aspect-[3/2] matches the source photo's own 2000x1333 ratio
+                exactly, so object-cover shows the full frame — including the
+                ReBAT sign behind him — with nothing cropped off the sides. */}
             <Image
               src="/images/about/karan-khurana.jpg"
               alt={ABOUT_LEADERSHIP.name}
-              width={384}
-              height={384}
-              className="h-full w-full object-cover"
+              width={1200}
+              height={800}
+              className="aspect-[3/2] h-full w-full object-cover"
             />
           </div>
           <h3 className="text-2xl font-bold text-white sm:text-3xl">{ABOUT_LEADERSHIP.name}</h3>
