@@ -225,7 +225,14 @@ function MaterialSlide({ material, isActive }: { material: RecycledMaterial; isA
         <div className="flex flex-col items-center gap-6 p-10 pb-16 md:p-16 md:pb-16">
           <div className="relative aspect-square w-full max-w-[600px] overflow-hidden rounded-2xl shadow-[0_40px_80px_-24px_rgba(0,0,0,0.35)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img loading="lazy" decoding="async" src={material.image} alt={material.name} className="h-full w-full object-cover" />
+            <img
+              loading="lazy"
+              decoding="async"
+              src={material.image}
+              alt={material.name}
+              className="h-full w-full object-cover"
+              style={{ objectPosition: material.imagePosition ?? "center" }}
+            />
           </div>
           <div className={`flex w-full max-w-[600px] items-baseline gap-3 ${useLightText ? "text-white" : "text-ink"}`}>
             <span className={`text-sm font-medium ${useLightText ? "text-white/50" : "text-grey-400"}`}>{material.tag}</span>

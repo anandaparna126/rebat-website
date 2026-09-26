@@ -85,6 +85,7 @@ export default function SourceFromUs() {
                       src={material.image}
                       alt={material.name}
                       className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                      style={{ objectPosition: material.imagePosition ?? "center" }}
                     />
                   </div>
                   <div className="mt-4 flex items-baseline justify-between gap-2">
@@ -144,7 +145,14 @@ export default function SourceFromUs() {
                 <Reveal key={item.materialId} delay={i * 0.05}>
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img loading="lazy" decoding="async" src={material.image} alt={material.name} className="absolute inset-0 h-full w-full object-cover" />
+                    <img
+                      loading="lazy"
+                      decoding="async"
+                      src={material.image}
+                      alt={material.name}
+                      className="absolute inset-0 h-full w-full object-cover"
+                      style={{ objectPosition: material.imagePosition ?? "center" }}
+                    />
                     <div
                       className="pointer-events-none absolute inset-0"
                       style={{ background: "linear-gradient(to top, rgba(10,20,18,0.75) 0%, rgba(10,20,18,0.15) 45%, rgba(10,20,18,0) 70%)" }}
