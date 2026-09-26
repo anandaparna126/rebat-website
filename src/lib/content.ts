@@ -340,7 +340,7 @@ export const PRODUCTS_HERO: PageHeroContent = {
 
 export const ABOUT_HERO: PageHeroContent = {
   eyebrow: "About us",
-  headline: "Closing the Loop on India's Battery Future.",
+  headline: "Closing the Loop on India's Battery Future",
 };
 
 export const JOBS_HERO: PageHeroContent = {

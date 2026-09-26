@@ -43,6 +43,7 @@ export function PartnerHero({
   ctaLabel = "Partner with us",
   ctaHref = "#explore-panels",
   onCtaClick,
+  headlineClassName = "text-4xl font-medium leading-[1.15] sm:text-5xl",
 }: {
   eyebrow: string;
   headline: string;
@@ -55,6 +56,9 @@ export function PartnerHero({
    * that just need a plain link (the main hub's "Partner with us" scroll
    * anchor) omit this and keep the default ContactButton behaviour. */
   onCtaClick?: () => void;
+  /** Overrides the headline's size/weight classes for pages that want a
+   * bigger, bolder treatment than the shared default. */
+  headlineClassName?: string;
 }) {
   const restClipRef = useRef(computeRestClip());
   const [contentVisible, setContentVisible] = useState(false);
@@ -106,7 +110,7 @@ export function PartnerHero({
               style={{ opacity: contentVisible ? 1 : 0, paddingLeft: TEXT_INSET_CSS, paddingRight: TEXT_INSET_CSS }}
             >
               <div className="mb-4 text-xs font-medium tracking-[0.08em] text-white/70 uppercase">{eyebrow}</div>
-              <h1 className="max-w-2xl text-4xl font-medium leading-[1.15] text-white sm:text-5xl">{headline}</h1>
+              <h1 className={`max-w-2xl text-white ${headlineClassName}`}>{headline}</h1>
               {description && <p className="mt-4 max-w-xl text-lg text-white/80">{description}</p>}
               {onCtaClick ? (
                 <EnquiryButton label={ctaLabel} onClick={onCtaClick} className="mt-8 w-fit" />

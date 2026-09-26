@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { PageShell } from "@/components/layout/PageShell";
 import { PartnerHero } from "@/components/partner/PartnerHero";
 import { Reveal } from "@/components/ui/Reveal";
@@ -49,6 +50,7 @@ export default function AboutUs() {
         description={ABOUT_TAGLINE}
         ctaLabel="Get in touch"
         ctaHref="/contact"
+        headlineClassName="max-w-3xl text-5xl font-bold leading-[1.15] sm:text-6xl"
       />
 
       {/* About ReBAT */}
@@ -174,18 +176,23 @@ export default function AboutUs() {
         </div>
       </section>
 
-      {/* Leadership — no photo supplied, an initials mark stands in rather
-          than inventing or sourcing a stock headshot. */}
-      <section className="relative overflow-hidden bg-grey-900 px-[5vw] py-24">
+      {/* Leadership */}
+      <section className="relative overflow-hidden bg-grey-900 px-[5vw] pt-32 pb-24">
         <Grain opacity={0.05} />
         <Reveal className="relative mx-auto flex max-w-[720px] flex-col items-center text-center">
           <div className="mb-3 text-xs font-medium tracking-[0.08em] text-white/50 uppercase">Leadership</div>
-          <span
-            className="mb-6 flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white"
+          <div
+            className="mb-6 h-36 w-36 overflow-hidden rounded-full ring-4 ring-white/10"
             style={{ background: "linear-gradient(155deg, var(--brand-hover), var(--brand-deep))" }}
           >
-            {ABOUT_LEADERSHIP.initials}
-          </span>
+            <Image
+              src="/images/about/karan-khurana.jpg"
+              alt={ABOUT_LEADERSHIP.name}
+              width={288}
+              height={288}
+              className="h-full w-full object-cover"
+            />
+          </div>
           <h3 className="text-2xl font-bold text-white sm:text-3xl">{ABOUT_LEADERSHIP.name}</h3>
           <p className="mt-1 text-sm font-medium tracking-[0.08em] text-gold uppercase">{ABOUT_LEADERSHIP.title}</p>
           <div className="mt-6 space-y-4 text-base leading-relaxed text-white/70">
