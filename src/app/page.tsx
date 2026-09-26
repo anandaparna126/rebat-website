@@ -8,8 +8,10 @@ import { Products } from "@/components/products/Products";
 import { Recognition } from "@/components/association/Recognition";
 import { Newsroom } from "@/components/newsroom/Newsroom";
 import { GetInTouch } from "@/components/cta/GetInTouch";
+import { getPublishedArticles } from "@/lib/newsroomApi";
 
-export default function Home() {
+export default async function Home() {
+  const articles = await getPublishedArticles();
   return (
     <>
       <HeroTrack />
@@ -20,7 +22,7 @@ export default function Home() {
         <RebatStorySection />
         <Products variant="classic" />
         <Recognition />
-        <Newsroom />
+        <Newsroom articles={articles} />
         <GetInTouch />
       </main>
       <Footer />
