@@ -104,7 +104,14 @@ export function Impact() {
     <div className="bg-surface-stone">
       <section
         className="relative overflow-hidden rounded-b-[32px] px-[5vw] py-20"
-        style={{ background: "linear-gradient(100deg, #dde3d3 0%, var(--surface-mineral) 50%, #eae1ce 100%)" }}
+        style={{
+          // Layered on top of the section's own gradient: a soft fade from
+          // ProcessLoop's own ending mint tone (#F3FBF7), so the seam where
+          // that section's rounded-bottom card meets this one reads as a
+          // continuous blend instead of a hard, sudden-looking cut.
+          background:
+            "linear-gradient(180deg, #F3FBF7 0%, rgba(243,251,247,0) 14%), linear-gradient(100deg, #dde3d3 0%, var(--surface-mineral) 50%, #eae1ce 100%)",
+        }}
       >
         <Grain opacity={0.05} />
 
