@@ -119,6 +119,9 @@ export const RECYCLED_MATERIALS: RecycledMaterial[] = [
     name: "Lithium",
     tag: "Li",
     image: "/images/products/recovered/lithium.webp",
+    // The pile sits lower in this photo (on a petri dish) than the other
+    // materials' shots — centring the crop (the default) cut its base off.
+    imagePosition: "center 78%",
     color: "linear-gradient(155deg, #eef2ea, #c7d1c2)",
     glow: "#a9b8a3",
     textOn: "dark",
