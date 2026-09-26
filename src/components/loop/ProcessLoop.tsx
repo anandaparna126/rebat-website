@@ -810,7 +810,7 @@ export function ProcessLoop() {
         <Reveal className="relative z-10 -mb-6">
           <div className="mb-2 text-base font-bold tracking-[0.08em] uppercase" style={{ color: "#0E7A5E" }}>Partner with us</div>
           <h2 className="text-5xl font-bold" style={{ color: "#D9772B" }}>
-            Close the loop.
+            Close the loop
           </h2>
         </Reveal>
 
