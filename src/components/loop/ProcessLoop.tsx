@@ -36,64 +36,91 @@ function pts(...ps: G3[]) {
 /* Layout (ground-plane grid units)                                  */
 /* ---------------------------------------------------------------- */
 
+// No base plate: the whole section is the ground, like an open city map.
+// The main line runs down the screen diagonal; the two process lanes sit
+// either side of it; the return leg is a ring road along the bottom.
 const LAYOUT: Record<string, G2> = {
-  collection: [0, 1.5],
-  factory: [2.8, 1.5],
-  characterisation: [5, 1.5],
-  recycling: [7.2, 0],
-  refurb: [7.2, 3.2],
-  extraction: [10, 0],
-  packmaker: [10, 3.2],
-  quality: [12.2, 0],
-  testing: [12.2, 3.2],
-  cellmaker: [14.4, 0],
-  customers: [14.4, 3.2],
-  used: [7.2, 5.8],
+  collection: [0, 0],
+  factory: [4.2, 0],
+  characterisation: [8.4, 0],
+  recycling: [13.4, -3.6],
+  refurb: [13.4, 3.6],
+  extraction: [17.6, -3.6],
+  packmaker: [17.6, 3.6],
+  quality: [21.8, -3.6],
+  testing: [21.8, 3.6],
+  cellmaker: [26, -3.6],
+  customers: [26, 3.6],
+  used: [12.8, 7.4],
 };
 
 // Road waypoints between the two node centres, so every road runs along
-// the ground grid — the return leg becomes one ring road around the site.
+// the ground grid.
 const VIA: Record<string, G2[]> = {
-  "characterisation>recycling": [[6.1, 1.5], [6.1, 0]],
-  "characterisation>refurb": [[6.1, 1.5], [6.1, 3.2]],
-  "cellmaker>packmaker": [[14.4, 1.6], [10, 1.6]],
-  "customers>used": [[14.4, 5.8]],
-  "used>collection": [[0, 5.8]],
+  "characterisation>recycling": [[10.8, 0], [10.8, -3.6]],
+  "characterisation>refurb": [[10.8, 0], [10.8, 3.6]],
+  "cellmaker>packmaker": [[26, 0], [17.6, 0]],
+  "customers>used": [[26, 7.4]],
+  "used>collection": [[4.2, 7.4], [4.2, 2.6], [0, 2.6]],
 };
 
-const PLATE = { x0: -1.6, x1: 15.8, y0: -1.4, y1: 6.9, t: 22 };
+// Public roads that aren't part of the flow — they carry the grid out past
+// every edge of the section so the site reads as part of a wider map.
+const CITY_ROADS: G2[][] = [
+  [[-14, 0], [0, 0]],
+  [[10.8, 0], [17.6, 0]],
+  [[26, 0], [42, 0]],
+  [[-14, 7.4], [4.2, 7.4]],
+  [[26, 7.4], [42, 7.4]],
+  [[4.2, 7.4], [4.2, 24]],
+  [[26, 7.4], [26, 24]],
+  [[-14, -8.5], [42, -8.5]],
+  [[7, -8.5], [7, -24]],
+  [[17, -8.5], [17, -24]],
+  [[29.5, -8.5], [29.5, -24]],
+];
 
 // Facilities are drawn at this multiple of their base footprint, scaled
 // about their own ground centre so the isometric angles stay true.
-const S = 1.3;
+const S = 2;
+// Scenery (trees, turbines, panels, vehicles, people) scale.
+const DS = 1.6;
 
-const TREES: [number, number, number][] = [
-  [-1.1, -0.6, 0], [-0.3, -1.0, 1], [1.4, -0.4, 0], [2.1, -0.9, 1], [3.7, 0.1, 0],
-  [4.3, -0.6, 1], [5.2, -1.0, 0], [8.6, -1.05, 0], [9.2, -1.1, 1], [11.1, -1.05, 1],
-  [13.1, -1.1, 0], [15.3, 1.0, 0], [15.35, 1.8, 1], [15.3, 4.3, 1], [15.35, 6.4, 0],
-  [8.5, 2.0, 1], [7.4, 1.6, 0], [11.1, 2.2, 0], [-0.8, 3.2, 1], [-0.9, 4.2, 0],
-  [-0.7, 5.1, 1], [4.4, 2.8, 0], [4.7, 3.6, 1], [4.3, 4.6, 0], [0.9, 5.1, 1],
-  [5.4, 5.0, 0], [10.6, 5.15, 1], [12.8, 5.2, 0], [8.6, 4.4, 0], [2.4, 6.45, 0],
-  [5.5, 6.45, 1], [9.8, 6.5, 0], [12.3, 6.45, 1],
+const SOLAR_FIELDS: { gx0: number; gy0: number; cols: number; rows: number }[] = [
+  { gx0: 0.7, gy0: 3.7, cols: 4, rows: 4 },
+  { gx0: 11, gy0: -14.2, cols: 5, rows: 3 },
+  { gx0: 31, gy0: 1.4, cols: 3, rows: 4 },
 ];
+const SOLAR: G2[] = SOLAR_FIELDS.flatMap((f) =>
+  Array.from({ length: f.cols * f.rows }, (_, i) => [f.gx0 + (i % f.cols) * 0.95, f.gy0 + Math.floor(i / f.cols) * 0.9] as G2),
+);
 
-// Solar field in the open ground between the main line and the ring road.
-const SOLAR: G2[] = [1.35, 1.95, 2.55, 3.15].flatMap((gx) => [2.8, 3.4, 4.0].map((gy) => [gx, gy] as G2));
-
+// Drawn at DS scale, so hub heights here are pre-scale.
 const TURBINES: [gx: number, gy: number, hub: number, speed: number][] = [
-  [9.6, 4.9, 82, 7],
-  [11.8, 4.95, 72, 5.5],
-  [13.9, 4.95, 78, 8],
+  [9.5, -11.2, 92, 7],
+  [13, -11.6, 84, 5.5],
+  [16.5, -11.2, 90, 8],
+  [20, -11.6, 82, 6.5],
+  [23.5, -11.2, 92, 7.5],
+  [1.8, 10.8, 90, 6],
+  [7.4, 11.2, 84, 8],
+  [11.4, 10.6, 92, 5.8],
 ];
 
 // Vehicles running straight road stretches (they fade in/out at the ends,
-// where they disappear into a facility).
+// where they drive into a facility or off the edge of the map).
 const TRUCKS: { from: G2; to: G2 }[] = [
-  { from: [0, 1.5], to: [2.8, 1.5] },
-  { from: [14.4, 3.2], to: [14.4, 5.8] },
-  { from: [14.4, 5.8], to: [0, 5.8] },
-  { from: [0, 5.8], to: [0, 1.5] },
+  { from: [-14, 0.14], to: [0, 0.14] },
+  { from: [0, 0], to: [4.2, 0] },
+  { from: [42, -8.36], to: [-14, -8.36] },
+  { from: [-14, -8.64], to: [42, -8.64] },
+  { from: [26, 3.6], to: [26, 7.4] },
+  { from: [42, 7.26], to: [4.2, 7.26] },
+  { from: [4.2, 7.4], to: [4.2, 2.6] },
+  { from: [26, 24], to: [26, 7.54] },
 ];
+
+const PEOPLE_COLORS = ["#0E7A5E", "#DDB73C", "#2F4A7A", "#F2994A", "#3E7666"];
 
 /* ---------------------------------------------------------------- */
 /* Palette                                                           */
@@ -285,6 +312,25 @@ function Turbine({ gx, gy, hub, speed }: { gx: number; gy: number; hub: number; 
       <circle cx={r1(x)} cy={r1(hy)} r={3.8} fill="#0E7A5E" stroke="#FFFFFF" strokeWidth={1} />
     </g>
   );
+}
+
+function Person({ gx, gy, color }: { gx: number; gy: number; color: string }) {
+  const [x, y] = iso(gx, gy);
+  return (
+    <g>
+      <ellipse cx={r1(x + 1.5)} cy={r1(y)} rx={5} ry={2} fill="#0A3D2E" opacity={0.14} />
+      <rect x={r1(x - 2.4)} y={r1(y - 9)} width={1.8} height={9} rx={0.9} fill="#2B3A4A" />
+      <rect x={r1(x + 0.6)} y={r1(y - 9)} width={1.8} height={9} rx={0.9} fill="#2B3A4A" />
+      <rect x={r1(x - 3)} y={r1(y - 18)} width={6} height={10} rx={2.6} fill={color} />
+      <circle cx={r1(x)} cy={r1(y - 21.5)} r={3} fill="#E8B98F" />
+    </g>
+  );
+}
+
+// Scales a scenery sprite about its own ground point.
+function Scaled({ gx, gy, k, children }: { gx: number; gy: number; k: number; children: ReactNode }) {
+  const [ox, oy] = iso(gx, gy).map(r1);
+  return <g transform={`translate(${ox} ${oy}) scale(${k}) translate(${-ox} ${-oy})`}>{children}</g>;
 }
 
 // A small delivery truck drawn around the ground origin, facing along one
@@ -532,7 +578,7 @@ function signAnchor(route: G2[]): Pt {
       const mx = s.a[0] + (s.b[0] - s.a[0]) * t;
       const my = s.a[1] + (s.b[1] - s.a[1]) * t;
       const alongX = Math.abs(s.b[0] - s.a[0]) >= Math.abs(s.b[1] - s.a[1]);
-      return iso(mx + (alongX ? 0 : 1), my + (alongX ? 1 : 0));
+      return iso(mx + (alongX ? 0 : 1.8), my + (alongX ? 1.8 : 0));
     }
     half -= s.l;
   }
@@ -545,8 +591,8 @@ const EDGES = LOOP_EDGES.filter((e) => LAYOUT[e.from] && LAYOUT[e.to]).map((e) =
   return { ...e, key, ...screenPath(route), sign: e.label ? signAnchor(route) : null };
 });
 
-const LABEL_FS = 16, SUB_FS = 13, LABEL_LH = 20, SUB_LH = 16, PAD_X = 14, PAD_Y = 12;
-const LABEL_CW = LABEL_FS * 0.56, SUB_CW = SUB_FS * 0.53, MAX_TEXT_W = 176;
+const LABEL_FS = 23, SUB_FS = 18, LABEL_LH = 28, SUB_LH = 23, PAD_X = 20, PAD_Y = 17;
+const LABEL_CW = LABEL_FS * 0.56, SUB_CW = SUB_FS * 0.53, MAX_TEXT_W = 250;
 
 function wrap(text: string, charW: number): string[] {
   const lines: string[] = [];
@@ -574,11 +620,11 @@ const CARDS: Card[] = (() => {
     const label = wrap(n.label, LABEL_CW);
     const sub = n.sublabel ? wrap(n.sublabel, SUB_CW) : [];
     const textW = Math.max(...label.map((l) => l.length * LABEL_CW), ...sub.map((l) => l.length * SUB_CW));
-    const w = Math.max(116, textW + PAD_X * 2 + 12);
-    const h = PAD_Y * 2 + label.length * LABEL_LH + (sub.length ? 4 + sub.length * SUB_LH : 0) - 4;
+    const w = Math.max(160, textW + PAD_X * 2 + 18);
+    const h = PAD_Y * 2 + label.length * LABEL_LH + (sub.length ? 6 + sub.length * SUB_LH : 0) - 6;
     const [ax, ay] = iso(gx, gy, f.anchorZ * S);
     const clearY = iso(gx, gy, f.clearZ * S)[1];
-    return { id: n.id, label, sub, depth: gx + gy, ax, ay, x: ax - w / 2 + (f.dx ?? 0), y: clearY - 20 - h, w, h };
+    return { id: n.id, label, sub, depth: gx + gy, ax, ay, x: ax - w / 2, y: clearY - 30 - h, w, h };
   });
   // Nudge overlapping cards apart: whichever facility sits further back
   // gets lifted, which keeps every card above its own building.
@@ -601,23 +647,93 @@ const CARDS: Card[] = (() => {
   return cards;
 })();
 
+// The visible window: every facility, label and flow road with some air
+// around it. Scenery and city roads run past these edges and get cropped,
+// which is what makes it read as a slice of a larger map.
 const VIEW = (() => {
-  const corners = [
-    iso(PLATE.x0, PLATE.y0), iso(PLATE.x1, PLATE.y0), iso(PLATE.x1, PLATE.y1), iso(PLATE.x0, PLATE.y1),
-  ];
-  const xs = [...corners.map((c) => c[0]), ...CARDS.flatMap((c) => [c.x, c.x + c.w])];
-  const ys = [...corners.map((c) => c[1]), ...CARDS.map((c) => c.y)];
-  const minX = Math.min(...xs) - 24, maxX = Math.max(...xs) + 24;
-  const minY = Math.min(...ys) - 24, maxY = Math.max(...corners.map((c) => c[1])) + PLATE.t + 40;
+  const footprints = NODES.flatMap((n) => {
+    const [gx, gy] = LAYOUT[n.id];
+    const [w, d] = (FACILITIES[n.id] ?? FALLBACK).fp;
+    const hw = (w * S) / 2, hd = (d * S) / 2;
+    return [iso(gx - hw, gy + hd), iso(gx + hw, gy - hd), iso(gx + hw, gy + hd)];
+  });
+  const routePts = LOOP_EDGES.flatMap((e) => [LAYOUT[e.from], ...(VIA[`${e.from}>${e.to}`] ?? []), LAYOUT[e.to]])
+    .filter(Boolean)
+    .map(([gx, gy]) => iso(gx, gy));
+  const xs = [...footprints, ...routePts].map((p) => p[0]).concat(CARDS.flatMap((c) => [c.x, c.x + c.w]));
+  const ys = [...footprints, ...routePts].map((p) => p[1]);
+  const minX = Math.min(...xs) - 150, maxX = Math.max(...xs) + 150;
+  const minY = Math.min(...CARDS.map((c) => c.y)) - 120, maxY = Math.max(...ys) + 110;
   return { minX, minY, w: maxX - minX, h: maxY - minY };
 })();
+
+function distToSeg(p: G2, a: G2, b: G2) {
+  const dx = b[0] - a[0], dy = b[1] - a[1];
+  const t = Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy || 1)));
+  return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+}
+
+const ALL_ROADS: G2[][] = [
+  ...CITY_ROADS,
+  ...LOOP_EDGES.map((e) => [LAYOUT[e.from], ...(VIA[`${e.from}>${e.to}`] ?? []), LAYOUT[e.to]]),
+];
+
+function inView(gx: number, gy: number, pad = 60) {
+  const [x, y] = iso(gx, gy);
+  return x > VIEW.minX - pad && x < VIEW.minX + VIEW.w + pad && y > VIEW.minY - pad && y < VIEW.minY + VIEW.h + pad;
+}
+
+function clearOfEverything(p: G2, roadGap: number) {
+  if (ALL_ROADS.some((r) => r.slice(1).some((b, i) => distToSeg(p, r[i], b) < roadGap))) return false;
+  if (NODES.some((n) => {
+    const [gx, gy] = LAYOUT[n.id];
+    const [w, d] = (FACILITIES[n.id] ?? FALLBACK).fp;
+    return Math.abs(p[0] - gx) < (w * S) / 2 + 0.9 && Math.abs(p[1] - gy) < (d * S) / 2 + 1.2;
+  })) return false;
+  if (SOLAR.some((s) => Math.abs(p[0] - s[0]) < 0.8 && Math.abs(p[1] - s[1]) < 0.75)) return false;
+  if (TURBINES.some(([gx, gy]) => Math.hypot(p[0] - gx, p[1] - gy) < 1.1)) return false;
+  return true;
+}
+
+const hash = (a: number, b: number) => {
+  const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+};
+
+// Trees scattered over every open patch of ground in view, thinned by a
+// smooth noise field so they gather into clumps rather than a grid.
+const TREES: [number, number, number][] = (() => {
+  const out: [number, number, number][] = [];
+  for (let gx = -14; gx <= 42; gx += 1.05) {
+    for (let gy = -24; gy <= 24; gy += 1.05) {
+      const p: G2 = [gx + (hash(gx, gy) - 0.5) * 0.7, gy + (hash(gy, gx) - 0.5) * 0.7];
+      if (!inView(p[0], p[1])) continue;
+      const clump = (Math.sin(p[0] * 0.55) + Math.cos(p[1] * 0.62) + Math.sin((p[0] + p[1]) * 0.31)) / 3;
+      if (hash(p[0] * 3, p[1] * 7) > 0.2 + clump * 0.45) continue;
+      if (!clearOfEverything(p, 0.85)) continue;
+      out.push([r1(p[0] * 100) / 100, r1(p[1] * 100) / 100, hash(p[1], p[0]) > 0.45 ? 0 : 1]);
+    }
+  }
+  return out;
+})();
+
+// A few people around each facility's forecourt.
+const PEOPLE: [number, number, string][] = NODES.flatMap((n, i) => {
+  const [gx, gy] = LAYOUT[n.id];
+  const [w, d] = (FACILITIES[n.id] ?? FALLBACK).fp;
+  const fx = gx + (w * S) / 2 + 0.55, fy = gy + (d * S) / 2 + 0.55;
+  const spots: G2[] = [[fx, gy + 0.3], [fx + 0.35, gy + 0.65], [gx - 0.4, fy], [gx + 0.05, fy + 0.3]];
+  return spots
+    .filter((p, j) => (i + j) % 2 === 0 && !ALL_ROADS.some((r) => r.slice(1).some((b, k) => distToSeg(p, r[k], b) < 0.55)))
+    .map((p, j) => [p[0], p[1], PEOPLE_COLORS[(i + j) % PEOPLE_COLORS.length]] as [number, number, string]);
+});
 
 const TRUCK_RUNS = TRUCKS.map((t, i) => {
   const axis: "x" | "y" = t.from[1] === t.to[1] ? "x" : "y";
   const k = axis === "x" ? 0 : 1;
   const dir: 1 | -1 = t.to[k] > t.from[k] ? 1 : -1;
   const { d, len } = screenPath([t.from, t.to]);
-  return { key: `truck${i}`, axis, dir, d, dur: len / 42 };
+  return { key: `truck${i}`, axis, dir, d, dur: len / 75 };
 });
 
 type SceneObject = { depth: number; key: string; node: ReactNode };
@@ -661,16 +777,23 @@ export function ProcessLoop() {
         ),
       };
     }),
-    ...TREES.map(([gx, gy, kind], i) => ({ depth: gx + gy, key: `t${i}`, node: <Tree gx={gx} gy={gy} kind={kind} /> })),
-    ...SOLAR.map(([gx, gy], i) => ({ depth: gx + gy, key: `s${i}`, node: <SolarPanel gx={gx} gy={gy} /> })),
+    ...TREES.map(([gx, gy, kind], i) => ({
+      depth: gx + gy, key: `t${i}`,
+      node: <Scaled gx={gx} gy={gy} k={DS}><Tree gx={gx} gy={gy} kind={kind} /></Scaled>,
+    })),
+    ...SOLAR.map(([gx, gy], i) => ({
+      depth: gx + gy, key: `s${i}`,
+      node: <Scaled gx={gx} gy={gy} k={DS}><SolarPanel gx={gx} gy={gy} /></Scaled>,
+    })),
     ...TURBINES.map(([gx, gy, hub, speed], i) => ({
-      depth: gx + gy,
-      key: `w${i}`,
-      node: <Turbine gx={gx} gy={gy} hub={hub} speed={speed} />,
+      depth: gx + gy, key: `w${i}`,
+      node: <Scaled gx={gx} gy={gy} k={DS}><Turbine gx={gx} gy={gy} hub={hub} speed={speed} /></Scaled>,
+    })),
+    ...PEOPLE.map(([gx, gy, color], i) => ({
+      depth: gx + gy, key: `p${i}`,
+      node: <Scaled gx={gx} gy={gy} k={DS}><Person gx={gx} gy={gy} color={color} /></Scaled>,
     })),
   ].sort((a, b) => a.depth - b.depth);
-
-  const P = PLATE;
 
   return (
     // Same technique as Description: this wrapper carries the *next*
@@ -679,13 +802,13 @@ export function ProcessLoop() {
     <div style={{ background: "linear-gradient(90deg, #e2f0ad, var(--surface-yellow) 55%, var(--surface-mineral))" }}>
       <section
         id="recycle-with-us"
-        className="relative overflow-hidden rounded-b-[32px] px-[5vw] py-20"
-        style={{ background: "linear-gradient(90deg, #aaead2, #dff6ed)" }}
+        className="relative overflow-hidden rounded-b-[32px] px-[5vw] pt-20"
+        style={{ background: "linear-gradient(180deg, #D7F1E6 0%, #E8F7F0 45%, #F3FBF7 100%)" }}
       >
         <style>{LOOP_CSS}</style>
 
-        <Reveal className="mb-6">
-          <div className="mb-2 text-base font-bold tracking-[0.08em] text-white uppercase">Partner with us</div>
+        <Reveal className="relative z-10 -mb-6">
+          <div className="mb-2 text-base font-bold tracking-[0.08em] uppercase" style={{ color: "#0E7A5E" }}>Partner with us</div>
           <h2 className="text-5xl font-bold" style={{ color: "#f2984f" }}>
             Close the loop.
           </h2>
@@ -701,17 +824,22 @@ export function ProcessLoop() {
         </ol>
 
         <Reveal>
-          <div className="-mx-[5vw] overflow-x-auto px-[5vw]">
+          <div className="-mx-[5vw] overflow-x-auto">
             <svg
               viewBox={`${r1(VIEW.minX)} ${r1(VIEW.minY)} ${r1(VIEW.w)} ${r1(VIEW.h)}`}
-              className="mx-auto block h-auto w-full max-w-[1500px] min-w-[1100px]"
+              className="block h-auto w-full min-w-[1100px]"
+              style={{
+                maskImage: "linear-gradient(to bottom, transparent 0, #000 7%)",
+                WebkitMaskImage: "linear-gradient(to bottom, transparent 0, #000 7%)",
+              }}
               aria-hidden="true"
             >
               <defs>
-                <linearGradient id="loopPlate" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#FAFEFC" />
-                  <stop offset="1" stopColor="#E3F2EC" />
-                </linearGradient>
+                <radialGradient id="loopLotGlow">
+                  <stop offset="0" stopColor="#34D399" stopOpacity="0.32" />
+                  <stop offset="0.6" stopColor="#34D399" stopOpacity="0.12" />
+                  <stop offset="1" stopColor="#34D399" stopOpacity="0" />
+                </radialGradient>
                 <linearGradient id="loopCylMint" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0" stopColor="#FFFFFF" />
                   <stop offset="0.55" stopColor="#D6EDE3" />
@@ -756,57 +884,49 @@ export function ProcessLoop() {
                 <filter id="loopCardShadow" x="-20%" y="-20%" width="140%" height="160%">
                   <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#0A3D2E" floodOpacity="0.14" />
                 </filter>
-                <filter id="loopPlateShadow" x="-10%" y="-10%" width="120%" height="140%">
-                  <feGaussianBlur stdDeviation="18" />
-                </filter>
               </defs>
 
-              {/* Ground plate */}
-              <polygon
-                points={pts([P.x0, P.y0, -P.t - 14], [P.x1, P.y0, -P.t - 14], [P.x1, P.y1, -P.t - 14], [P.x0, P.y1, -P.t - 14])}
-                fill="#0A3D2E" opacity={0.16} filter="url(#loopPlateShadow)"
-              />
-              <polygon points={pts([P.x0, P.y1, 0], [P.x1, P.y1, 0], [P.x1, P.y1, -P.t], [P.x0, P.y1, -P.t])} fill="#BFE2D5" />
-              <polygon points={pts([P.x1, P.y0, 0], [P.x1, P.y1, 0], [P.x1, P.y1, -P.t], [P.x1, P.y0, -P.t])} fill="#9ED0BD" />
-              <polygon points={pts([P.x0, P.y0, 0], [P.x1, P.y0, 0], [P.x1, P.y1, 0], [P.x0, P.y1, 0])} fill="url(#loopPlate)" />
-              <g stroke="#FFFFFF" strokeWidth={1} opacity={0.7}>
-                {Array.from({ length: Math.floor(P.x1 - P.x0) }, (_, i) => {
-                  const gx = Math.ceil(P.x0) + i;
-                  const [a, b] = [iso(gx, P.y0), iso(gx, P.y1)];
-                  return <line key={`gx${i}`} x1={r1(a[0])} y1={r1(a[1])} x2={r1(b[0])} y2={r1(b[1])} />;
-                })}
-                {Array.from({ length: Math.floor(P.y1 - P.y0) }, (_, i) => {
-                  const gy = Math.ceil(P.y0) + i;
-                  const [a, b] = [iso(P.x0, gy), iso(P.x1, gy)];
-                  return <line key={`gy${i}`} x1={r1(a[0])} y1={r1(a[1])} x2={r1(b[0])} y2={r1(b[1])} />;
-                })}
-              </g>
-
-              {/* Building lots */}
+              {/* Facility lots, each with a soft brand glow under it */}
               {NODES.map((n) => {
                 const [gx, gy] = LAYOUT[n.id];
                 const [bw, bd] = (FACILITIES[n.id] ?? FALLBACK).fp;
-                const w = bw * S, d = bd * S, m = 0.22;
+                const w = bw * S, d = bd * S, m = 0.7;
+                const [cx, cy] = iso(gx, gy);
+                const rx = (w + d) * CX * 0.95;
                 return (
-                  <polygon
-                    key={`lot-${n.id}`}
-                    points={pts(
-                      [gx - w / 2 - m, gy - d / 2 - m, 0], [gx + w / 2 + m, gy - d / 2 - m, 0],
-                      [gx + w / 2 + m, gy + d / 2 + m, 0], [gx - w / 2 - m, gy + d / 2 + m, 0],
-                    )}
-                    fill="#EBF6F1" stroke="#D5EAE1" strokeWidth={1}
-                  />
+                  <g key={`lot-${n.id}`}>
+                    <ellipse cx={r1(cx)} cy={r1(cy)} rx={r1(rx)} ry={r1(rx * 0.58)} fill="url(#loopLotGlow)" />
+                    <polygon
+                      points={pts(
+                        [gx - w / 2 - m, gy - d / 2 - m, 0], [gx + w / 2 + m, gy - d / 2 - m, 0],
+                        [gx + w / 2 + m, gy + d / 2 + m, 0], [gx - w / 2 - m, gy + d / 2 + m, 0],
+                      )}
+                      fill="#F3FBF7" stroke="#CDE7DC" strokeWidth={1.5}
+                    />
+                  </g>
                 );
               })}
 
-              {/* Roads */}
+              {/* Public roads (not part of the flow) */}
+              {CITY_ROADS.map((r, i) => {
+                const { d } = screenPath(r);
+                return (
+                  <g key={`city-${i}`}>
+                    <path d={d} fill="none" stroke="#C3DAD0" strokeWidth={46} strokeLinecap="square" strokeLinejoin="miter" />
+                    <path d={d} fill="none" stroke="#DCEBE5" strokeWidth={39} strokeLinecap="square" strokeLinejoin="miter" />
+                    <path d={d} fill="none" stroke="#FFFFFF" strokeWidth={2.4} strokeDasharray="14 12" opacity={0.85} />
+                  </g>
+                );
+              })}
+
+              {/* Flow roads */}
               {EDGES.map((e) => (
-                <g key={`road-${e.key}`} opacity={related(e) ? 1 : 0.3} style={{ transition: "opacity .3s ease" }}>
-                  <path d={e.d} fill="none" stroke="#B4CFC4" strokeWidth={30} strokeLinejoin="miter" />
-                  <path d={e.d} fill="none" stroke="#CFE2DA" strokeWidth={25} strokeLinejoin="miter" />
+                <g key={`road-${e.key}`} opacity={related(e) ? 1 : 0.35} style={{ transition: "opacity .3s ease" }}>
+                  <path d={e.d} fill="none" stroke="#A9C9BC" strokeWidth={48} strokeLinecap="square" strokeLinejoin="miter" />
+                  <path d={e.d} fill="none" stroke="#CBE0D7" strokeWidth={41} strokeLinecap="square" strokeLinejoin="miter" />
                   <path
-                    d={e.d} fill="none" stroke={active && related(e) ? "#DDB73C" : "#FFFFFF"} strokeWidth={2}
-                    strokeDasharray="8 10" className="loop-flow"
+                    d={e.d} fill="none" stroke={active && related(e) ? "#DDB73C" : "#FFFFFF"} strokeWidth={3}
+                    strokeDasharray="14 12" className="loop-flow"
                   />
                 </g>
               ))}
@@ -821,12 +941,12 @@ export function ProcessLoop() {
               {/* Material flowing along each road */}
               {motion &&
                 EDGES.map((e) => {
-                  const n = Math.max(1, Math.round(e.len / 230));
-                  const dur = e.len / 46;
+                  const n = Math.max(1, Math.round(e.len / 300));
+                  const dur = e.len / 80;
                   return Array.from({ length: n }, (_, k) => (
                     <g key={`p-${e.key}-${k}`} opacity={related(e) ? 1 : 0.25}>
-                      <circle r={14} fill="url(#loopGlow)" />
-                      <rect x={-7.5} y={-3.6} width={15} height={7.2} rx={3.6} fill="#F6D365" stroke="#FFF6D8" strokeWidth={1} />
+                      <circle r={22} fill="url(#loopGlow)" />
+                      <rect x={-11} y={-5.2} width={22} height={10.4} rx={5.2} fill="#F6D365" stroke="#FFF6D8" strokeWidth={1.4} />
                       <animateMotion
                         dur={`${r1(dur)}s`}
                         begin={`-${r1((k * dur) / n)}s`}
@@ -842,7 +962,9 @@ export function ProcessLoop() {
               {motion &&
                 TRUCK_RUNS.map((t, i) => (
                   <g key={t.key} opacity={0}>
-                    <TruckSprite axis={t.axis} dir={t.dir} />
+                    <g transform={`scale(${DS})`}>
+                      <TruckSprite axis={t.axis} dir={t.dir} />
+                    </g>
                     <animateMotion dur={`${r1(t.dur)}s`} begin={`-${r1(i * 1.7)}s`} repeatCount="indefinite" path={t.d} />
                     <animate
                       attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1"
@@ -860,16 +982,16 @@ export function ProcessLoop() {
               {EDGES.filter((e) => e.sign && e.label).map((e) => {
                 const lines = e.label!.split("\n");
                 const [x, y] = e.sign!;
-                const fs = 12.5, lh = 15, padX = 11, padY = 7;
+                const fs = 18, lh = 22, padX = 16, padY = 11;
                 const w = Math.max(...lines.map((l) => l.length)) * fs * 0.55 + padX * 2;
-                const h = lines.length * lh + padY * 2 - 2;
-                const top = y - 14 - h;
+                const h = lines.length * lh + padY * 2 - 3;
+                const top = y - 22 - h;
                 return (
                   <g key={`sign-${e.key}`} opacity={related(e) ? 1 : 0.4} style={{ transition: "opacity .3s ease" }}>
-                    <ellipse cx={r1(x)} cy={r1(y)} rx={6} ry={3} fill="#0A3D2E" opacity={0.18} />
-                    <line x1={r1(x)} y1={r1(y)} x2={r1(x)} y2={r1(top + h)} stroke="#0B3B2E" strokeWidth={1.6} />
-                    <rect x={r1(x - w / 2)} y={r1(top)} width={r1(w)} height={r1(h)} rx={Math.min(11, h / 2)} fill="#0B3B2E" filter="url(#loopCardShadow)" />
-                    <text x={r1(x)} y={r1(top + padY + 10.5)} textAnchor="middle" fontSize={fs} fontWeight={600} fill="#FFFFFF">
+                    <ellipse cx={r1(x)} cy={r1(y)} rx={9} ry={4} fill="#0A3D2E" opacity={0.18} />
+                    <line x1={r1(x)} y1={r1(y)} x2={r1(x)} y2={r1(top + h)} stroke="#0B3B2E" strokeWidth={2.2} />
+                    <rect x={r1(x - w / 2)} y={r1(top)} width={r1(w)} height={r1(h)} rx={Math.min(15, h / 2)} fill="#0B3B2E" filter="url(#loopCardShadow)" />
+                    <text x={r1(x)} y={r1(top + padY + 15)} textAnchor="middle" fontSize={fs} fontWeight={600} fill="#FFFFFF">
                       {lines.map((l, i) => (
                         <tspan key={i} x={r1(x)} dy={i === 0 ? 0 : lh}>
                           {l}
@@ -893,30 +1015,30 @@ export function ProcessLoop() {
                     opacity={active && !isActive && !EDGES.some((e) => related(e) && (e.from === c.id || e.to === c.id)) ? 0.55 : 1}
                     style={{ transition: "opacity .3s ease" }}
                   >
-                    <line x1={r1(c.ax)} y1={r1(c.ay)} x2={r1(stemX)} y2={r1(bottom)} stroke="#0E7A5E" strokeWidth={1.3} opacity={0.55} />
-                    <circle cx={r1(c.ax)} cy={r1(c.ay)} r={3.4} fill="#FFFFFF" stroke="#0E7A5E" strokeWidth={1.6} />
+                    <line x1={r1(c.ax)} y1={r1(c.ay)} x2={r1(stemX)} y2={r1(bottom)} stroke="#0E7A5E" strokeWidth={2} opacity={0.55} />
+                    <circle cx={r1(c.ax)} cy={r1(c.ay)} r={5} fill="#FFFFFF" stroke="#0E7A5E" strokeWidth={2.2} />
                     <rect
-                      x={r1(c.x)} y={r1(c.y)} width={r1(c.w)} height={r1(c.h)} rx={12}
-                      fill="#FFFFFF" stroke={isActive ? "#0E7A5E" : "#D6E9E1"} strokeWidth={isActive ? 1.6 : 1}
+                      x={r1(c.x)} y={r1(c.y)} width={r1(c.w)} height={r1(c.h)} rx={16}
+                      fill="#FFFFFF" stroke={isActive ? "#0E7A5E" : "#D6E9E1"} strokeWidth={isActive ? 2.4 : 1.4}
                       filter="url(#loopCardShadow)"
                     />
-                    <path d={`M${r1(stemX - 6)},${r1(bottom - 0.5)} L${r1(stemX)},${r1(bottom + 6)} L${r1(stemX + 6)},${r1(bottom - 0.5)} Z`} fill="#FFFFFF" />
-                    <circle cx={r1(c.x + PAD_X + 3.5)} cy={r1(c.y + PAD_Y + 9)} r={3.5} fill="#0E7A5E" />
-                    <text x={r1(c.x + PAD_X + 13)} y={r1(c.y + PAD_Y + 14)} fontSize={LABEL_FS} fontWeight={600} fill="#1A2321">
+                    <path d={`M${r1(stemX - 9)},${r1(bottom - 0.5)} L${r1(stemX)},${r1(bottom + 9)} L${r1(stemX + 9)},${r1(bottom - 0.5)} Z`} fill="#FFFFFF" />
+                    <circle cx={r1(c.x + PAD_X + 5)} cy={r1(c.y + PAD_Y + 12)} r={5} fill="#0E7A5E" />
+                    <text x={r1(c.x + PAD_X + 18)} y={r1(c.y + PAD_Y + 20)} fontSize={LABEL_FS} fontWeight={600} fill="#1A2321">
                       {c.label.map((l, i) => (
-                        <tspan key={i} x={r1(c.x + PAD_X + 13)} dy={i === 0 ? 0 : LABEL_LH}>
+                        <tspan key={i} x={r1(c.x + PAD_X + 18)} dy={i === 0 ? 0 : LABEL_LH}>
                           {l}
                         </tspan>
                       ))}
                     </text>
                     {c.sub.length > 0 && (
                       <text
-                        x={r1(c.x + PAD_X + 13)}
-                        y={r1(c.y + PAD_Y + 14 + c.label.length * LABEL_LH + 2)}
+                        x={r1(c.x + PAD_X + 18)}
+                        y={r1(c.y + PAD_Y + 20 + c.label.length * LABEL_LH + 4)}
                         fontSize={SUB_FS} fill="#5F7A73"
                       >
                         {c.sub.map((l, i) => (
-                          <tspan key={i} x={r1(c.x + PAD_X + 13)} dy={i === 0 ? 0 : SUB_LH}>
+                          <tspan key={i} x={r1(c.x + PAD_X + 18)} dy={i === 0 ? 0 : SUB_LH}>
                             {l}
                           </tspan>
                         ))}
@@ -934,7 +1056,8 @@ export function ProcessLoop() {
 }
 
 const LOOP_CSS = `
-.loop-flow { animation: dash 1.1s linear infinite; }
+.loop-flow { animation: loopDash 1.2s linear infinite; }
+@keyframes loopDash { to { stroke-dashoffset: -26; } }
 .loop-bldg { transition: transform .35s cubic-bezier(.2,.8,.2,1); cursor: default; }
 .loop-bldg[data-active="true"] { transform: translateY(-6px); }
 .loop-smoke circle { fill: #FFFFFF; opacity: 0; transform-box: fill-box; transform-origin: center; animation: loopSmoke 3.3s ease-out infinite; }
