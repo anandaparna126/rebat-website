@@ -124,7 +124,7 @@ export function Impact() {
             Impact
           </div>
           <h2 className="text-5xl font-bold" style={{ color: "var(--brand-deep)" }}>
-            What closing the loop changes.
+            What closing the loop changes
           </h2>
         </Reveal>
 
