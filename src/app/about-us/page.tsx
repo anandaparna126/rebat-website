@@ -182,14 +182,14 @@ export default function AboutUs() {
         <Reveal className="relative mx-auto flex max-w-[720px] flex-col items-center text-center">
           <div className="mb-3 text-xs font-medium tracking-[0.08em] text-white/50 uppercase">Leadership</div>
           <div
-            className="mb-6 h-36 w-36 overflow-hidden rounded-full ring-4 ring-white/10"
+            className="mb-6 h-56 w-56 overflow-hidden rounded-full ring-4 ring-white/10 sm:h-64 sm:w-64"
             style={{ background: "linear-gradient(155deg, var(--brand-hover), var(--brand-deep))" }}
           >
             <Image
               src="/images/about/karan-khurana.jpg"
               alt={ABOUT_LEADERSHIP.name}
-              width={288}
-              height={288}
+              width={384}
+              height={384}
               className="h-full w-full object-cover"
             />
           </div>
