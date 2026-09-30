@@ -130,6 +130,9 @@ export interface LoopNode {
   id: string;
   label: string;
   sublabel?: string;
+  /** The building at ReBAT's own site where this step happens, for the
+   * steps that run inside the factory compound. */
+  plant?: string;
 }
 
 export interface LoopEdge {
@@ -138,41 +141,42 @@ export interface LoopEdge {
   label?: string;
 }
 
-// The ReBAT factory flow diagram, updated per ReBAT's own walkthrough of
-// the real process: collection center -> reverse logistics -> factory ->
-// characterisation/test -> [recycling / refurbishment] -> ... -> customers,
-// looping back to the collection center. Nothing invented beyond what was
-// described directly. Where each node sits on screen is presentation, not
+// The ReBAT factory flow diagram, per ReBAT's own walkthrough of the real
+// process: a truck brings scrap from the collection center into the
+// factory; the QC Lab characterises it and decides whether it goes to the
+// Chemical Plant, the Mechanical Plant or the Second Life Plant. Mechanical
+// processing gives black mass for the Chemical Plant, whose recovered
+// metals go to cell manufacturing, whose rejected batteries go back to the
+// collection center. The Second Life Plant's battery packs go
+// to testing, then customers, whose used batteries come back to the
+// collection center. Where each node sits on screen is presentation, not
 // content — see ProcessLoop.tsx's LAYOUT.
 export const LOOP_NODES: LoopNode[] = [
   { id: "collection", label: "Collection Center", sublabel: "Organized (OEMs) + Unorganized (Scrap Dealers)" },
-  { id: "factory", label: "ReBAT Factory" },
-  { id: "characterisation", label: "Characterisation / Test", sublabel: "ReBAT Hitech Lab" },
-  { id: "recycling", label: "Recycling Plant", sublabel: "Battery Scrap Processing" },
-  { id: "refurb", label: "Refurbished Batteries", sublabel: "Reconditioning" },
-  { id: "extraction", label: "Critical Mineral Extraction Plant", sublabel: "Lithium, Cobalt, Nickel, etc." },
-  { id: "packmaker", label: "Battery Pack Manufacturing Plant", sublabel: "Assemble Battery Packs" },
-  { id: "quality", label: "Quality Check Control" },
+  { id: "factory", label: "ReBAT Factory", plant: "Warehouse" },
+  { id: "characterisation", label: "Advanced Innovation & Quality Testing Center", sublabel: "ReBAT Hitech Lab", plant: "QC and Innovation Lab" },
+  { id: "recycling", label: "Recycling Plant", sublabel: "Battery Scrap Processing", plant: "Recycling Plant" },
+  { id: "refurb", label: "Refurbished Batteries", sublabel: "Reconditioning", plant: "Second Life Plant" },
+  { id: "extraction", label: "Critical Mineral Extraction Plant", sublabel: "Lithium, Cobalt, Nickel, etc.", plant: "Hydrometallurgy Plant" },
+  { id: "packmaker", label: "Battery Pack Manufacturing Plant", sublabel: "Assemble Battery Packs", plant: "Second Life Plant" },
+  { id: "quality", label: "Advanced Innovation & Quality Testing Center", plant: "QC and Innovation Lab" },
   { id: "testing", label: "Testing" },
   { id: "cellmaker", label: "Cell Manufacturer", sublabel: "Cells" },
   { id: "customers", label: "Customers", sublabel: "EV Battery Buyers" },
-  { id: "used", label: "Used Batteries", sublabel: "Back to Collection" },
 ];
 
 export const LOOP_EDGES: LoopEdge[] = [
   { from: "collection", to: "factory", label: "Reverse Logistics\nAcross the Nation" },
   { from: "factory", to: "characterisation" },
   { from: "characterisation", to: "recycling" },
+  { from: "characterisation", to: "extraction" },
   { from: "characterisation", to: "refurb" },
-  { from: "recycling", to: "extraction", label: "Black Mass" },
-  { from: "refurb", to: "packmaker" },
-  { from: "extraction", to: "quality" },
-  { from: "packmaker", to: "testing" },
-  { from: "quality", to: "cellmaker" },
-  { from: "cellmaker", to: "packmaker" },
+  { from: "recycling", to: "extraction" },
+  { from: "extraction", to: "cellmaker" },
+  { from: "refurb", to: "testing" },
   { from: "testing", to: "customers" },
-  { from: "customers", to: "used" },
-  { from: "used", to: "collection" },
+  { from: "customers", to: "collection", label: "Used Batteries" },
+  { from: "cellmaker", to: "collection" },
 ];
 
 export interface MaterialItem {
