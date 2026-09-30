@@ -534,8 +534,10 @@ const CHEM_WALL: Shade = ["#EBF3F1", "#D1E4DF", "#BFD9D3"];
 const QC_WALL: Shade = ["#EBF3F1", "#EBF3F1", "#D1E4DF"];
 const BRIDGE: Shade = ["#BFD9D3", "#A6CAC1", "#80B3A7"];
 const STEEL_BLUE = ["#599C8D", "#338572"] as const;
-const SHED_ROOF = ["#EBF3F1", "#E0EDEA"] as const;
-const CHEM_ROOF = ["#BFD9D3", "#A6CAC1"] as const;
+// The Recycling and Hydrometallurgy Plants' roofs are mid and deep greens,
+// dark enough to stand out from the pale ground and trees around them.
+const SHED_ROOF = ["#599C8D", "#338572"] as const;
+const CHEM_ROOF = ["#338572", "#035340"] as const;
 // The front shed (Second Life Plant and Testing) under a near-black roof.
 const SECOND_ROOF = ["#064233", "#083126"] as const;
 // Testing shares the front shed but has its own brand-green roof, so it
@@ -841,7 +843,7 @@ function SiteBuildings({ active, onHover }: { active: string | null; onHover: (i
         <Face r={mech} side="R" a={sy(-0.15)} b={sy(0.65)} z1={0 * HK} z2={21 * HK} fill="#338572" />
         <Face r={mech} side="R" a={sy(-0.15)} b={sy(0.65)} z1={4 * HK} z2={5 * HK} fill="#599C8D" />
         <Vents r={mech} h={H.shed} rise={H.shedRise} cols={[0.2, 0.45, 0.72]} step={0.64 * K} />
-        <RoofName {...slopeSpot(mech, H.shed, H.shedRise)} along="y" text="RECYCLING PLANT" fill={NAME_DARK} />
+        <RoofName {...slopeSpot(mech, H.shed, H.shedRise)} along="y" text="RECYCLING PLANT" fill={NAME_LIGHT} />
       </Plant>
 
       {/* The garden: hedges, a canopy of trees and the gazebo */}
@@ -1014,14 +1016,14 @@ function Sack() {
 }
 
 // A new battery cell, fresh out of cell manufacturing: an upright
-// cylindrical cell in brand green with its label band.
+// cylindrical cell in red with its label band.
 function NewCell() {
   return (
     <g transform={`scale(${ICON_SCALE})`}>
       <ellipse cy={1} rx={8} ry={2.4} fill="#064233" opacity={0.2} />
-      <rect x={-6} y={-24} width={12} height={24} rx={2.5} fill="#00674F" stroke="#FFFFFF" strokeWidth={1.1} />
+      <rect x={-6} y={-24} width={12} height={24} rx={2.5} fill="#E53935" stroke="#FFFFFF" strokeWidth={1.1} />
       <rect x={-6} y={-16.5} width={12} height={7} fill="#FFFFFF" opacity={0.92} />
-      <text y={-11.3} textAnchor="middle" fontSize={4.6} fontWeight={800} fill="#00674F">CELL</text>
+      <text y={-11.3} textAnchor="middle" fontSize={4.6} fontWeight={800} fill="#E53935">CELL</text>
       <rect x={-2.2} y={-26.5} width={4.4} height={2.8} rx={0.8} fill="#DDB73C" />
     </g>
   );
