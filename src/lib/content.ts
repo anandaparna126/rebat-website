@@ -16,7 +16,7 @@ export const NAV_LINKS = [
   { href: "/newsroom", label: "Newsroom" },
 ] as const;
 
-export const TAGLINE_EYEBROW = "Powering the circular battery economy";
+export const TAGLINE_EYEBROW = "Energising the circular battery economy";
 export const TAGLINE = "Renew. Recover. Power. India's energy future.";
 
 export const DESCRIPTION_EMPHASIS =

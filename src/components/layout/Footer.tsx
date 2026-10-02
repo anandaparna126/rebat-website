@@ -61,6 +61,16 @@ export function Footer() {
         </div>
       </div>
 
+      {/* Sage Green Industries lockup, pinned bottom-left to balance the
+          Sage Group lockup on the right. */}
+      <img
+        src="/images/sgi-white.webp"
+        alt="Sage Green Industries"
+        width={1000}
+        height={874}
+        className="absolute left-[5vw] bottom-4 h-auto w-[clamp(64px,7vw,140px)] select-none"
+      />
+
       {/* The Sage Group parent-company lockup, pinned bottom-right. */}
       <img
         src="/images/sage-group-white.webp"
