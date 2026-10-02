@@ -1,7 +1,9 @@
 import { ContactButton } from "@/components/ui/ContactButton";
 import { Mark } from "@/components/mark/Mark";
 import { Grain } from "@/components/ui/Grain";
-import { NAV_LINKS, VALUE_CHAIN_SOURCES } from "@/lib/content";
+import { SocialLinks } from "@/components/ui/SocialLinks";
+import { NAV_LINKS } from "@/lib/content";
+import { isExternalHref } from "@/lib/links";
 
 export function Footer() {
   return (
@@ -14,30 +16,21 @@ export function Footer() {
       <Grain opacity={0.05} />
 
       <div className="relative mb-16 flex flex-wrap items-start justify-between gap-10">
-        <Mark size={28} color="#ffffff" />
+        <div className="flex flex-col gap-5">
+          <Mark size={28} color="#ffffff" />
+          <SocialLinks className="-ml-2" />
+        </div>
 
-        {/* Column layout matching cylib's own footer — main nav plus the 3
-            real value-chain pages (mirrors cylib's own Recycle with us
-            sub-links, now that those pages actually exist). No further
-            sub-links invented for About us / Products / Newsroom since we
-            don't have separate pages/sections for those yet. */}
+        {/* Main nav links only — no sub-links. */}
         <div className="grid grid-cols-2 gap-x-12 gap-y-6 sm:grid-cols-3 lg:grid-cols-6">
           {NAV_LINKS.map((link) => (
             <a
               key={link.href}
               href={link.href}
               className="text-sm font-semibold text-white/90 transition-colors hover:text-white"
+              {...(isExternalHref(link.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
             >
               {link.label}
-            </a>
-          ))}
-          {VALUE_CHAIN_SOURCES.map((source) => (
-            <a
-              key={source.id}
-              href={`/${source.slug}`}
-              className="text-sm text-white/60 transition-colors hover:text-white"
-            >
-              {source.title}
             </a>
           ))}
         </div>
@@ -48,7 +41,6 @@ export function Footer() {
       <div className="relative mb-2 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/40">
         <span>&copy; {new Date().getFullYear()} ReBAT</span>
         <span className="flex gap-3">
-          <a href="/imprint" className="transition-colors hover:text-white">Imprint</a>
           <a href="/privacy-policy" className="transition-colors hover:text-white">Privacy</a>
         </span>
       </div>

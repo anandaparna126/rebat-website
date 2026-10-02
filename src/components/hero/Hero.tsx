@@ -75,9 +75,7 @@ export function Hero() {
   return (
     <section className="relative h-full bg-white">
       <motion.div className="absolute inset-0 overflow-hidden bg-brand-deep" style={{ clipPath }}>
-        <video className="block h-full w-full object-cover" src="/video/hero.mp4" poster="/video/hero-poster.webp" preload="auto" autoPlay muted loop playsInline />
-        {/* Placeholder footage (see content notes) — swap for ReBAT's own
-            plant video before anything here goes live. */}
+        <video className="block h-full w-full object-cover" src="/video/hero.mp4" poster="/video/hero-poster.webp" autoPlay muted loop playsInline />
         <div className="absolute inset-0 bg-gradient-to-b from-brand/25 via-transparent to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-deep via-brand-deep/40 to-transparent" />
         {/* Fixed top vignette, independent of scroll — keeps the nav links

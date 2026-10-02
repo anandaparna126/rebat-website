@@ -3,6 +3,7 @@ import { Eyebrow } from "@/components/solutions/Eyebrow";
 import { SolutionCta, SolutionHero } from "@/components/solutions/SolutionEnquiry";
 import { Grain } from "@/components/ui/Grain";
 import { Reveal } from "@/components/ui/Reveal";
+import { CollectedGallery } from "@/components/story/CollectedGallery";
 import { REVERSE_LOGISTICS as C, MODALS } from "@/lib/solutions-content";
 
 // Reverse Logistics — movement, infrastructure, traceability. A flow page:
@@ -126,6 +127,8 @@ export default function ReverseLogistics() {
           </div>
         </div>
       </section>
+
+      <CollectedGallery />
 
       {/* Traceability */}
       <section className="bg-white px-[5vw] py-28">

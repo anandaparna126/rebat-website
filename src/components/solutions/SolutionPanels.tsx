@@ -1,6 +1,6 @@
 import { SOLUTIONS } from "@/lib/solutions";
 
-// Four full-height photographic panels — four doors into ReBAT's
+// Full-height photographic panels — one door per solution into ReBAT's
 // capabilities, not cards. Each panel is one real <a>, so the whole surface
 // is clickable and follows normal browser navigation. The photo is the
 // dominant element; text sits directly on it, over a restrained
@@ -14,7 +14,7 @@ const EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 export function SolutionPanels() {
   return (
     // 1px gaps on a dark ground read as thin dividers between the panels.
-    <div className="grid grid-cols-1 gap-px bg-[#0e1412] sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-px bg-[#0e1412] sm:grid-cols-3">
       {SOLUTIONS.map((solution) => (
         <a
           key={solution.slug}

@@ -10,7 +10,7 @@ export default function ProductsPage() {
       <PartnerHero
         eyebrow={PRODUCTS_HERO.eyebrow}
         headline={PRODUCTS_HERO.headline}
-        image="/images/products/hero.webp"
+        image="/images/products/hero-products.webp"
         description="From recovered battery materials to engineered battery solutions, our products keep valuable resources in use."
         ctaLabel="Get in touch"
         ctaHref="/contact"

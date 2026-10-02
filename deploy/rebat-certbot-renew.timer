@@ -1,0 +1,12 @@
+# Checks twice a day; certbot only renews once the cert is close to expiry.
+# Installed at /etc/systemd/system/rebat-certbot-renew.timer
+[Unit]
+Description=Twice-daily renewal check for the ReBAT IP certificate
+
+[Timer]
+OnCalendar=*-*-* 03,15:17:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

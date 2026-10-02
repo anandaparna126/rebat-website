@@ -8,10 +8,13 @@ import { Products } from "@/components/products/Products";
 import { Recognition } from "@/components/association/Recognition";
 import { Newsroom } from "@/components/newsroom/Newsroom";
 import { GetInTouch } from "@/components/cta/GetInTouch";
-import { getPublishedArticles } from "@/lib/newsroomApi";
+import { getArticles } from "@/lib/api";
+
+// Newsroom cards come from the backend; refetched at most every 30s.
+export const revalidate = 30;
 
 export default async function Home() {
-  const articles = await getPublishedArticles();
+  const articles = await getArticles();
   return (
     <>
       <HeroTrack />

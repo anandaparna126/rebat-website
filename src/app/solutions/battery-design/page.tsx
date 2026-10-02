@@ -6,6 +6,7 @@ import { ReducedMotion } from "@/components/solutions/ReducedMotion";
 import { SolutionCta, SolutionHero } from "@/components/solutions/SolutionEnquiry";
 import { Grain } from "@/components/ui/Grain";
 import { Reveal } from "@/components/ui/Reveal";
+import { TESTING_PHOTOS } from "@/lib/battery-photos";
 import { BATTERY_DESIGN as C, MODALS } from "@/lib/solutions-content";
 
 export const metadata: Metadata = {
@@ -213,9 +214,10 @@ export default function BatteryDesign() {
           </div>
         </section>
 
-        {/* 06 — Application-specific: only the applications ReBAT states. */}
-        <section aria-labelledby="bd-apps" className="bg-surface-mineral py-28 sm:py-36">
-          <div className="mx-auto max-w-[1328px] px-[5vw]">
+        {/* 06 — Application-specific: the six applications ReBAT states, each
+            with the packs built for it. */}
+        <section aria-labelledby="bd-apps" className="bg-surface-mineral px-[5vw] py-28 sm:py-36">
+          <div className="mx-auto max-w-[1328px]">
             <Reveal className="mb-16 max-w-[820px]">
               <Eyebrow>{C.applications.eyebrow}</Eyebrow>
               <h2 id="bd-apps" className="text-4xl leading-[1.06] font-medium text-ink sm:text-6xl">
@@ -223,40 +225,37 @@ export default function BatteryDesign() {
               </h2>
               <p className="mt-6 max-w-[52ch] text-base leading-relaxed text-grey-600">{C.applications.body}</p>
             </Reveal>
-          </div>
-          <div className="mx-auto max-w-[1600px]">
-            {C.applications.items.map((item, i) => (
-              <Reveal key={item.title} className="group grid items-stretch lg:grid-cols-12">
-                <div
-                  className={`relative h-[340px] overflow-hidden sm:h-[460px] lg:col-span-7 lg:h-[520px] ${i % 2 === 1 ? "lg:order-2" : ""} ${
-                    item.tile === "light" ? "bg-[#d8d5c9]" : "bg-[#0e1412]"
-                  }`}
+            <ol className="border-t border-grey-300">
+              {C.applications.items.map((item, i) => (
+                <Reveal
+                  as="li"
+                  key={item.title}
+                  delay={0.02}
+                  className="group grid gap-5 border-b border-grey-300 py-9 lg:grid-cols-[72px_minmax(0,1.2fr)_1fr] lg:items-baseline lg:gap-10"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={item.image}
-                    alt={item.alt}
-                    loading="lazy"
-                    className={`absolute inset-0 h-full w-full transition-transform duration-[700ms] ${EASE} group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${
-                      item.tile === "light" ? "object-contain p-10" : "object-cover"
-                    }`}
-                  />
-                </div>
-                <div className="flex flex-col justify-center px-[5vw] py-12 lg:col-span-5 lg:px-16">
                   <span className="text-xs font-medium tracking-[0.16em] text-grey-400">{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="mt-4 text-4xl font-semibold tracking-[0.02em] text-ink uppercase sm:text-5xl">{item.title}</h3>
-                  <p className="mt-4 max-w-[30ch] text-lg leading-snug text-grey-600">{item.description}</p>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-          <div className="mx-auto mt-14 max-w-[1328px] px-[5vw]">
-            <a href={C.applications.href} className={`group inline-flex items-center gap-2 text-sm font-medium text-brand ${FOCUS}`}>
-              {C.applications.cta}
-              <span aria-hidden="true" className={`transition-transform duration-500 ${EASE} group-hover:translate-x-1.5`}>
-                &rarr;
-              </span>
-            </a>
+                  <div>
+                    <h3 className="text-3xl font-semibold tracking-[0.02em] text-ink uppercase transition-colors duration-500 group-hover:text-brand sm:text-4xl">
+                      {item.title}
+                    </h3>
+                    <p className="mt-2 max-w-[36ch] text-base text-grey-600">{item.message}</p>
+                  </div>
+                  <ul className="space-y-1.5 text-sm text-grey-600 tabular-nums">
+                    {item.packs.map((pack) => (
+                      <li key={pack}>{pack}</li>
+                    ))}
+                  </ul>
+                </Reveal>
+              ))}
+            </ol>
+            <div className="mt-14">
+              <a href={C.applications.href} className={`group inline-flex items-center gap-2 text-sm font-medium text-brand ${FOCUS}`}>
+                {C.applications.cta}
+                <span aria-hidden="true" className={`transition-transform duration-500 ${EASE} group-hover:translate-x-1.5`}>
+                  &rarr;
+                </span>
+              </a>
+            </div>
           </div>
         </section>
 
@@ -307,6 +306,10 @@ export default function BatteryDesign() {
                 </Reveal>
               ))}
             </ol>
+            <Reveal delay={0.1} className="mt-8 grid gap-2 border-t border-white/15 pt-6 sm:grid-cols-[minmax(0,260px)_1fr] sm:gap-10">
+              <h3 className="text-lg font-semibold tracking-[0.04em] text-white uppercase">{C.system.beyond.title}</h3>
+              <p className="max-w-[60ch] text-sm text-white/60">{C.system.beyond.description}</p>
+            </Reveal>
           </div>
         </section>
 
@@ -344,7 +347,87 @@ export default function BatteryDesign() {
           </div>
         </section>
 
-        {/* 09 — Part of a larger lifecycle. */}
+        {/* 09 — Testing and quality control: the concrete side of validation. */}
+        <section aria-labelledby="bd-testing" className="relative overflow-hidden bg-grey-900 px-[5vw] py-28 sm:py-36">
+          <Grain opacity={0.05} />
+          <div className="relative mx-auto max-w-[1328px]">
+            <Reveal className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end lg:gap-24">
+              <div>
+                <Eyebrow light>{C.testing.eyebrow}</Eyebrow>
+                <h2 id="bd-testing" className="text-4xl leading-[1.06] font-medium text-white sm:text-6xl">
+                  {C.testing.headline}
+                </h2>
+              </div>
+              <p className="max-w-[52ch] text-base leading-relaxed text-white/60">{C.testing.body}</p>
+            </Reveal>
+
+            <ol className="grid grid-cols-1 gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-4">
+              {C.testing.stages.map((stage, i) => (
+                <Reveal as="li" key={stage.title} delay={i * 0.06} className="border-t border-white/25 pt-6">
+                  <span className="text-xs font-medium tracking-[0.16em] text-brand-hover">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="mt-3 text-2xl font-semibold tracking-[0.03em] text-white uppercase">{stage.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-white/65">{stage.summary}</p>
+                  <ul className="mt-6 divide-y divide-white/10 border-t border-white/10 text-sm text-white/80">
+                    {stage.checks.map((check) => (
+                      <li key={check} className="py-2.5">
+                        {check}
+                      </li>
+                    ))}
+                  </ul>
+                </Reveal>
+              ))}
+            </ol>
+
+            <div className="mt-20 grid grid-cols-3 gap-3 sm:gap-5">
+              {TESTING_PHOTOS.map((photo, i) => (
+                <Reveal key={photo.src} delay={i * 0.06}>
+                  <figure>
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#0e1412]">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={photo.src} alt={photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                    </div>
+                    <figcaption className="mt-3 text-[11px] font-medium tracking-[0.14em] text-white/50 uppercase">{photo.caption}</figcaption>
+                  </figure>
+                </Reveal>
+              ))}
+            </div>
+
+            <div className="mt-24 grid gap-10 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-24">
+              <Reveal>
+                <h3 className="text-2xl font-medium text-white sm:text-3xl">{C.testing.meaning.title}</h3>
+              </Reveal>
+              <dl className="border-t border-white/15">
+                {C.testing.meaning.items.map((m) => (
+                  <Reveal
+                    key={m.test}
+                    delay={0.02}
+                    className="grid gap-1 border-b border-white/15 py-5 sm:grid-cols-[minmax(0,220px)_1fr] sm:gap-10"
+                  >
+                    <dt className="text-sm font-semibold tracking-[0.06em] text-white uppercase">{m.test}</dt>
+                    <dd className="text-base text-white/70">{m.result}</dd>
+                  </Reveal>
+                ))}
+              </dl>
+            </div>
+
+            <Reveal delay={0.1}>
+              <ul className="mt-16 flex flex-wrap gap-x-3 gap-y-2 border-t border-white/15 pt-8 text-[11px] tracking-[0.1em] text-white/60 uppercase">
+                {C.testing.strip.map((item, i) => (
+                  <li key={item} className="flex items-center gap-3">
+                    {item}
+                    {i < C.testing.strip.length - 1 && (
+                      <span className="text-white/25" aria-hidden="true">
+                        |
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* 10 — Part of a larger lifecycle. */}
         <section aria-labelledby="bd-lifecycle" className="bg-white px-[5vw] py-28 sm:py-36">
           <div className="mx-auto max-w-[1328px]">
             <Reveal className="mb-16 grid gap-8 lg:grid-cols-2 lg:items-end lg:gap-24">

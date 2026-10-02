@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { Grain } from "@/components/ui/Grain";
+import { BATTERY_RANGE } from "@/lib/battery-packs";
 import { EngineeredEnergyCarousel } from "@/components/products/EngineeredEnergyCarousel";
 import { EngineeredEnergyCarouselClassic } from "@/components/products/EngineeredEnergyCarouselClassic";
 
@@ -12,7 +13,13 @@ import { EngineeredEnergyCarouselClassic } from "@/components/products/Engineere
 // honest "Pending" state for what's missing rather than inventing it.
 export function BatteryProductsShowcase({ variant = "detailed" }: { variant?: "classic" | "detailed" }) {
   return (
-    <section id="battery-products">
+    // Pulled up underneath RecycledMaterialsShowcase's rounded corner
+    // (that section sits at z-10; this one stays at the default stacking
+    // level) by roughly its own corner radius plus a few px of buffer —
+    // cylib's own real technique for this transition, confirmed live via
+    // computed styles (their equivalent pair uses z-index 10/5 and a
+    // -48px margin against a 40px radius).
+    <section id="battery-products" className="relative -mt-10">
       <div className="relative overflow-hidden bg-grey-900 py-24">
         {/* Same slow-drift technique as the Recovered Materials section's
             background wash, just a single constant brand-emerald glow
@@ -40,12 +47,13 @@ export function BatteryProductsShowcase({ variant = "detailed" }: { variant?: "c
         <Grain opacity={0.05} />
         {variant === "classic" ? (
           <Reveal className="relative mx-auto max-w-[1328px] px-[5vw] text-center">
-            <h3 className="mb-10 text-3xl font-medium text-white sm:text-4xl">Engineered Energy</h3>
+            <h3 className="text-3xl font-medium text-white sm:text-4xl">Engineered Energy</h3>
+            <p className="mt-3 mb-10 text-base text-white/60">{BATTERY_RANGE.tagline}</p>
           </Reveal>
         ) : (
           <Reveal className="relative mx-auto mb-14 max-w-[1328px] px-[5vw] text-center">
-            <div className="mb-2 text-xs font-medium tracking-[0.25em] text-white/50 uppercase">Engineered Energy</div>
-            <h3 className="text-3xl font-medium text-white sm:text-4xl">Battery solutions built for what comes next.</h3>
+            <div className="mb-2 text-xs font-medium tracking-[0.25em] text-white/50 uppercase">{BATTERY_RANGE.eyebrow}</div>
+            <h3 className="text-3xl font-medium text-white sm:text-4xl">{BATTERY_RANGE.tagline}</h3>
           </Reveal>
         )}
 

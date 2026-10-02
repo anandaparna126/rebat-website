@@ -28,7 +28,7 @@ export function Products({
       className={fadeFromWhite ? undefined : "bg-surface-stone"}
       style={fadeFromWhite ? { background: "linear-gradient(to bottom, #ffffff 0px, var(--surface-stone) 220px)" } : undefined}
     >
-      <ProductsIntro />
+      <ProductsIntro variant={variant} />
       <RecycledMaterialsShowcase variant={variant} />
       <BatteryProductsShowcase variant={variant} />
       <ProductsClosingCTA variant={variant} />

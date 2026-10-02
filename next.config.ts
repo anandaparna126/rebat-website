@@ -17,6 +17,10 @@ const nextConfig: NextConfig = {
       headers: cache,
     }));
   },
+  // Jobs live on the separate careers site.
+  async redirects() {
+    return [{ source: "/jobs", destination: "https://career.rebat.in/", permanent: false }];
+  },
 };
 
 export default nextConfig;

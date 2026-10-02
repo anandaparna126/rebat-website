@@ -46,4 +46,5 @@ export const MORE_THAN_RECYCLING: string[] = [
   "Manage Responsibly",
   "Strengthen Material Security",
   "Close the Loop",
+  "Reduce Environmental Impact",
 ];

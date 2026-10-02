@@ -1,6 +1,6 @@
 import { Reveal } from "@/components/ui/Reveal";
+import { StageVideo } from "@/components/story/StageVideo";
 import { TRANSFORM_STAGES } from "@/lib/story";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // Five stages meant to read as one continuous film strip rather than five
 // separate cards — edge-to-edge, no dividers between them, same aspect
@@ -19,7 +19,7 @@ export function ProcessFilmGrid() {
           strip is a single row at `lg`. */}
       <Reveal className="mb-6 px-2 text-center lg:hidden">
         <h2 className="text-3xl leading-[1.15] font-medium text-white sm:text-4xl">
-          We transform what&rsquo;s left into what comes next.
+          Transforming Waste into Building Blocks of Tomorrow
         </h2>
       </Reveal>
 
@@ -31,11 +31,10 @@ export function ProcessFilmGrid() {
         {TRANSFORM_STAGES.map((stage) => (
           <div key={stage.number} className="aspect-[3/4] w-full overflow-hidden bg-grey-100">
             {stage.video ? (
-              // eslint-disable-next-line jsx-a11y/media-has-caption
-              <LazyVideo className="h-full w-full object-cover" src={stage.video} />
+              <StageVideo stage={stage} />
             ) : stage.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={stage.image} alt={stage.name} loading="lazy" className="h-full w-full object-cover" />
+              <img src={stage.image} alt={stage.name} className="h-full w-full object-cover" />
             ) : null}
           </div>
         ))}
@@ -43,7 +42,7 @@ export function ProcessFilmGrid() {
         <div className="pointer-events-none absolute inset-0 z-10 hidden bg-black/45 lg:block" />
         <Reveal className="pointer-events-none absolute inset-0 z-10 hidden items-center justify-center px-10 text-center lg:flex">
           <h2 className="max-w-2xl text-4xl leading-[1.1] font-medium text-white sm:text-5xl lg:text-6xl">
-            We transform what&rsquo;s left into what comes next.
+            Transforming Waste into Building Blocks of Tomorrow
           </h2>
         </Reveal>
       </div>

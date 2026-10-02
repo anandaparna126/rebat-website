@@ -6,7 +6,6 @@ import { EnquiryButton } from "@/components/ui/EnquiryButton";
 import { EnquiryModal } from "@/components/ui/EnquiryModal";
 import { Grain } from "@/components/ui/Grain";
 import { Reveal } from "@/components/ui/Reveal";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // The dedicated solution pages are server-rendered, editorial pages; only
 // the parts that open the enquiry modal need client state, so they live here.
@@ -22,6 +21,7 @@ export interface SolutionModalConfig {
   headingAccent: string;
   description: string;
   topic: string;
+  messageTemplate: string;
 }
 
 export function SolutionHero({
@@ -82,9 +82,13 @@ export function SolutionCta({
     return (
       <div className="bg-brand">
         <section className="relative flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
-          <LazyVideo
+          <video
             className="pointer-events-none absolute inset-0 h-full w-full object-cover motion-reduce:hidden"
             src={video}
+            autoPlay
+            muted
+            loop
+            playsInline
             aria-hidden="true"
           />
           <div

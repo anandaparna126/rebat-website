@@ -3,7 +3,10 @@
 import { useState } from "react";
 import { useMotionValueEvent } from "motion/react";
 import { ContactButton } from "@/components/ui/ContactButton";
+import { NavDropdown } from "@/components/layout/NavDropdown";
 import { NAV_LINKS } from "@/lib/content";
+import { NAV_MENUS } from "@/lib/nav-menus";
+import { isExternalHref } from "@/lib/links";
 import { lerpColor, useScrollProgress } from "@/lib/useScrollProgress";
 
 // The nav's own background never activates — it stays transparent for the
@@ -38,13 +41,24 @@ export function Nav() {
           it. */}
       <div className="mx-auto flex max-w-[1400px] items-center justify-between py-7">
         <ul className="hidden items-center gap-7 text-[17px] font-medium md:flex" style={{ color: linkColor }}>
-          {NAV_LINKS.slice(0, 3).map((link) => (
-            <li key={link.href}>
-              <a href={link.href} className="transition-colors hover:text-brand" style={{ color: "inherit" }}>
-                {link.label}
-              </a>
-            </li>
-          ))}
+          {NAV_LINKS.slice(0, 3).map((link) => {
+            const menu = NAV_MENUS[link.href];
+            if (menu) {
+              return <NavDropdown key={link.href} href={link.href} label={link.label} items={menu} linkColor={linkColor} align="left" />;
+            }
+            return (
+              <li key={link.href}>
+                <a
+                  href={link.href}
+                  className="transition-colors hover:text-brand"
+                  style={{ color: "inherit" }}
+                  {...(isExternalHref(link.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {link.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
 
         {/* Real logo image, not the icon+text approximation — crossfades
@@ -63,13 +77,24 @@ export function Nav() {
 
         <div className="hidden items-center gap-7 md:flex">
           <ul className="flex items-center gap-7 text-[17px] font-medium" style={{ color: linkColor }}>
-            {NAV_LINKS.slice(3).map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="transition-colors hover:text-brand" style={{ color: "inherit" }}>
-                  {link.label}
-                </a>
-              </li>
-            ))}
+            {NAV_LINKS.slice(3).map((link) => {
+              const menu = NAV_MENUS[link.href];
+              if (menu) {
+                return <NavDropdown key={link.href} href={link.href} label={link.label} items={menu} linkColor={linkColor} align="right" />;
+              }
+              return (
+                <li key={link.href}>
+                  <a
+                    href={link.href}
+                    className="transition-colors hover:text-brand"
+                    style={{ color: "inherit" }}
+                    {...(isExternalHref(link.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              );
+            })}
           </ul>
           <ContactButton />
         </div>
@@ -87,17 +112,36 @@ export function Nav() {
       </div>
 
       {menuOpen && (
-        <div className="absolute inset-x-0 top-full flex flex-col gap-1 border-t border-grey-200 bg-grey-100 px-6 py-6 md:hidden">
-          {NAV_LINKS.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="rounded-md px-2 py-3 text-base font-medium text-grey-800 transition-colors hover:text-brand"
-            >
-              {link.label}
-            </a>
-          ))}
+        <div className="absolute inset-x-0 top-full flex max-h-[calc(100svh-88px)] flex-col gap-1 overflow-y-auto border-t border-grey-200 bg-grey-100 px-6 py-6 md:hidden">
+          {NAV_LINKS.map((link) => {
+            const menu = NAV_MENUS[link.href];
+            return (
+              <div key={link.href}>
+                <a
+                  href={link.href}
+                  onClick={() => setMenuOpen(false)}
+                  className="block rounded-md px-2 py-3 text-base font-medium text-grey-800 transition-colors hover:text-brand"
+                  {...(isExternalHref(link.href) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {link.label}
+                </a>
+                {menu && (
+                  <div className="mb-1 flex flex-col gap-0.5 pl-4">
+                    {menu.map((item) => (
+                      <a
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setMenuOpen(false)}
+                        className="rounded-md px-2 py-2 text-sm text-grey-600 transition-colors hover:text-brand"
+                      >
+                        {item.title}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <div className="mt-3">
             <ContactButton onClick={() => setMenuOpen(false)} />
           </div>

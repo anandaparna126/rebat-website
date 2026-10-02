@@ -1,3 +1,7 @@
+packages:
+  - "."
+  - "admin-panel"
+
 allowBuilds:
   ffmpeg-static: true
   sharp: false

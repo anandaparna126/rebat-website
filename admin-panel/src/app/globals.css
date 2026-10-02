@@ -1,0 +1,73 @@
+@import "tailwindcss";
+
+/* Same brand tokens as the website (src/app/globals.css). */
+:root {
+  --grey-50: #f4f5f5;
+  --grey-100: #e4e7e6;
+  --grey-200: #c8d0ce;
+  --grey-400: #9fadaa;
+  --grey-600: #677e79;
+  --grey-800: #3f504c;
+  --grey-900: #1a2321;
+
+  --brand: #00674f;
+  --brand-hover: #00a37d;
+  --brand-deep: #0a241c;
+  --brand-deep-2: #153b2f;
+  --gold: #ddb73c;
+
+  --surface: #ffffff;
+  --canvas: #f6f7f6;
+  --ink: var(--grey-900);
+}
+
+@theme inline {
+  --color-grey-50: var(--grey-50);
+  --color-grey-100: var(--grey-100);
+  --color-grey-200: var(--grey-200);
+  --color-grey-400: var(--grey-400);
+  --color-grey-600: var(--grey-600);
+  --color-grey-800: var(--grey-800);
+  --color-grey-900: var(--grey-900);
+
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-deep-2: var(--brand-deep-2);
+  --color-gold: var(--gold);
+
+  --color-surface: var(--surface);
+  --color-canvas: var(--canvas);
+  --color-ink: var(--ink);
+
+  --font-sans: var(--font-hanken), ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--canvas);
+  color: var(--ink);
+}
+
+/* Shared form-control look used across every admin form. */
+@utility field {
+  @apply w-full rounded-lg border border-grey-200 bg-white px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-grey-400 focus:border-brand focus:ring-2 focus:ring-brand/15;
+}
+@utility label {
+  @apply mb-1.5 block text-xs font-semibold tracking-wide text-grey-600 uppercase;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-brand text-white hover:bg-brand-deep-2;
+}
+@utility btn-secondary {
+  @apply btn border border-grey-200 bg-white text-ink hover:border-grey-400;
+}
+@utility btn-danger {
+  @apply btn border border-red-200 bg-white text-red-700 hover:bg-red-50;
+}
+@utility card {
+  @apply rounded-xl border border-grey-100 bg-white shadow-[0_1px_2px_rgba(16,24,22,0.04)];
+}

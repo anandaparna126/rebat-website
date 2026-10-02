@@ -15,12 +15,15 @@ export function RecycledMaterialsShowcase({ variant = "detailed" }: { variant?: 
   const [washColor, setWashColor] = useState(RECYCLED_MATERIALS[0].glow);
 
   return (
-    // Same rounded-corner notch-fill technique used across the rest of the
-    // site (Description, ProcessLoop, Impact): this wrapper carries the
-    // next section's colour (BatteryProductsShowcase's dark grey-900) so it
-    // shows through the notch instead of leaving a flat colour seam.
-    <div className="bg-grey-900">
-    <section id="recovered-materials" className="relative overflow-hidden rounded-b-[32px] bg-surface-stone pb-24">
+    // cylib's own real technique (inspected live via computed styles, not
+    // a manually colour-matched wrapper): this section sits above
+    // BatteryProductsShowcase in z-index (10 vs. its default stacking) and
+    // BatteryProductsShowcase is pulled up underneath it with a negative
+    // top margin. Wherever this section's own rounded corner curves away,
+    // BatteryProductsShowcase's *real* background shows through directly —
+    // nothing to keep manually in sync, unlike the old flat-colour wrapper
+    // this replaced (which went stale more than once this project).
+    <section id="recovered-materials" className="relative z-10 overflow-hidden rounded-b-[32px] bg-surface-stone pb-24">
       {/* A soft, slowly-drifting tint across the section's own stone
           background — colour follows whichever material is centred in the
           carousel below. Two nested layers: the outer one just anchors a
@@ -47,6 +50,17 @@ export function RecycledMaterialsShowcase({ variant = "detailed" }: { variant?: 
           }}
         />
       </div>
+      {/* The wash blob above is clipped hard by this section's own
+          `overflow-hidden` (needed for the rounded-bottom corner) — without
+          this, that clip reads as a visible seam right where the section
+          starts, instead of the tint gently building up. Fades the
+          section's own top edge back to plain surface-stone over a short
+          distance so the colour arrives gradually. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 z-0 h-40"
+        style={{ background: "linear-gradient(to bottom, var(--surface-stone) 0%, transparent 100%)" }}
+      />
 
       <Reveal className="relative mx-auto max-w-[1328px] px-[5vw] pb-12 text-center">
         <h3 className="text-3xl font-medium text-ink sm:text-4xl">Recovered Materials</h3>
@@ -59,6 +73,5 @@ export function RecycledMaterialsShowcase({ variant = "detailed" }: { variant?: 
         )}
       </div>
     </section>
-    </div>
   );
 }

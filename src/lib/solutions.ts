@@ -27,7 +27,7 @@ export const SOLUTIONS_HERO = {
   eyebrow: "Solutions",
   headline: "Built around the battery lifecycle.",
   description:
-    "From battery design and reverse logistics to EPR and advanced R&D, we bring technology and expertise together across the battery lifecycle.",
+    "From reverse logistics to EPR and advanced R&D, we bring technology and expertise together across the battery lifecycle.",
 };
 
 export const SOLUTIONS_CLOSING = {
@@ -38,21 +38,8 @@ export const SOLUTIONS_CLOSING = {
 
 export const SOLUTIONS: Solution[] = [
   {
-    slug: "battery-design",
-    number: "01",
-    title: "Battery Design",
-    statement: "Engineering batteries for what comes next.",
-    description:
-      "From battery architecture to application-specific systems, we develop solutions around how energy needs to perform.",
-    ctaLabel: "Explore Battery Design",
-    href: "/solutions/battery-design",
-    image: "/images/story/rejected-battery-packs.webp",
-    imageAlt: "An engineered battery pack with busbars and wiring on a workshop floor",
-    imagePosition: "50% 60%",
-  },
-  {
     slug: "reverse-logistics",
-    number: "02",
+    number: "01",
     title: "Reverse Logistics",
     statement: "Moving batteries back into the resource cycle.",
     description:
@@ -65,7 +52,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "epr",
-    number: "03",
+    number: "02",
     title: "EPR",
     statement: "Turning battery responsibility into action.",
     description: "Supporting businesses in managing their responsibilities across the battery lifecycle.",
@@ -77,7 +64,7 @@ export const SOLUTIONS: Solution[] = [
   },
   {
     slug: "r-and-d",
-    number: "04",
+    number: "03",
     title: "R&D",
     statement: "Where new battery possibilities take shape.",
     description:

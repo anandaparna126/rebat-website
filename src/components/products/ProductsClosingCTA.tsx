@@ -1,6 +1,5 @@
 import { Reveal } from "@/components/ui/Reveal";
 import { ContactButton } from "@/components/ui/ContactButton";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // The Products section's closing moment — a big, full-bleed looping video
 // (cylib's own treatment for a section like this: real footage filling the
@@ -18,10 +17,14 @@ export function ProductsClosingCTA({ variant = "detailed" }: { variant?: "classi
   const src = variant === "classic" ? "/videos/products/closing-cinematic-home.mp4" : "/videos/products/closing-cinematic.mp4";
   return (
     <div className="relative flex min-h-[80vh] items-center overflow-hidden bg-grey-900 px-[5vw] py-28">
-      <LazyVideo
+      <video
         key={src}
         className="pointer-events-none absolute inset-0 h-full w-full object-cover"
         src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
       />
       <div
         className="pointer-events-none absolute inset-0"

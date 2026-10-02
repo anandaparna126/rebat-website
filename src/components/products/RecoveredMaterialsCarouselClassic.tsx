@@ -176,26 +176,6 @@ function MaterialSlide({ material, isActive }: { material: RecycledMaterial; isA
   // background reads dark.
   const useLightText = material.textOn === "light";
   const videoRef = useRef<HTMLVideoElement>(null);
-  // The carousel sits far down the homepage, so even the active slide waits
-  // until it is near the viewport before fetching its video.
-  const [inView, setInView] = useState(false);
-  const [seen, setSeen] = useState(false);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        setInView(entry.isIntersecting);
-        if (entry.isIntersecting) setSeen(true);
-      },
-      { rootMargin: "300px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
-  const live = isActive && inView;
 
   // Only the currently-visible slide's video ever loads or plays — every
   // other slide's video stays fully unloaded (preload="none", no src)
@@ -210,29 +190,33 @@ function MaterialSlide({ material, isActive }: { material: RecycledMaterial; isA
       el.play().catch(() => {});
     }
 
-    if (live) {
+    if (isActive) {
       tryPlay();
       document.addEventListener("visibilitychange", tryPlay);
       return () => document.removeEventListener("visibilitychange", tryPlay);
     } else {
       el.pause();
     }
-  }, [live]);
+  }, [isActive]);
 
   return (
     <div className="overflow-hidden rounded-[28px]" style={{ background: material.color }}>
       <div className="grid grid-cols-1 items-start gap-10 md:grid-cols-2 md:gap-8">
         <div className="flex flex-col items-center gap-6 p-10 pb-16 md:p-16 md:pb-16">
           <div className="relative aspect-square w-full max-w-[600px] overflow-hidden rounded-2xl shadow-[0_40px_80px_-24px_rgba(0,0,0,0.35)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              loading="lazy"
-              decoding="async"
-              src={material.image}
-              alt={material.name}
-              className="h-full w-full object-cover"
-              style={{ objectPosition: material.imagePosition ?? "center" }}
-            />
+            {material.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={material.squareImage ?? material.image} alt={material.name} className="h-full w-full object-cover" />
+            ) : (
+              <div
+                className={`flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed text-center ${
+                  useLightText ? "border-white/25 text-white/60" : "border-grey-900/15 text-grey-600"
+                }`}
+              >
+                <span className="text-[11px] font-medium tracking-[0.15em] uppercase opacity-70">Pending</span>
+                <span className="text-xs">Product photography</span>
+              </div>
+            )}
           </div>
           <div className={`flex w-full max-w-[600px] items-baseline gap-3 ${useLightText ? "text-white" : "text-ink"}`}>
             <span className={`text-sm font-medium ${useLightText ? "text-white/50" : "text-grey-400"}`}>{material.tag}</span>
@@ -245,9 +229,9 @@ function MaterialSlide({ material, isActive }: { material: RecycledMaterial; isA
             // eslint-disable-next-line jsx-a11y/media-has-caption
             <video
               ref={videoRef}
-              src={isActive && seen ? material.video : undefined}
+              src={isActive ? material.video : undefined}
               poster={material.videoPoster}
-              preload={isActive && seen ? "auto" : "none"}
+              preload={isActive ? "auto" : "none"}
               muted
               loop
               playsInline
@@ -268,6 +252,15 @@ function MaterialSlide({ material, isActive }: { material: RecycledMaterial; isA
               {material.story}
             </p>
           )}
+          <a
+            href={`/products#${material.id}`}
+            className={`group flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70 ${useLightText ? "text-white" : "text-ink"}`}
+          >
+            View in Products
+            <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+              &rarr;
+            </span>
+          </a>
         </div>
       </div>
     </div>

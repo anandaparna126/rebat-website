@@ -81,14 +81,11 @@ function PhotoLayer({
         style={{ clipPath: HEX_CLIP, scale }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img loading="lazy" decoding="async"
+        <img
           src={material.image}
           alt={material.name}
           className="h-full w-full object-cover transition-[filter] duration-700"
-          style={{
-            filter: engineered ? "grayscale(0.55) contrast(1.15) brightness(0.85)" : "none",
-            objectPosition: material.imagePosition ?? "center",
-          }}
+          style={{ filter: engineered ? "grayscale(0.55) contrast(1.15) brightness(0.85)" : "none" }}
         />
         {engineered && (
           <div

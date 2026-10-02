@@ -5,6 +5,10 @@ import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { Mark } from "@/components/mark/Mark";
 import { GlowAura } from "@/components/ui/GlowAura";
+import { CONTACT_INFO } from "@/lib/content";
+import { enquiryFromForm, submitEnquiry } from "@/lib/enquiry";
+
+const PHONE_DIGITS = CONTACT_INFO.phone.replace(/\D/g, "");
 
 export interface EnquiryModalProps {
   open: boolean;
@@ -36,6 +40,10 @@ export interface EnquiryModalProps {
    * their enquiry is already scoped to (no invented topic categories to
    * pick from). */
   topic: string;
+  /** Pre-filled starting text for the Message field, specific to this
+   * enquiry type — an editable draft, not just placeholder hint text, so a
+   * visitor in a hurry can submit with minimal typing. */
+  messageTemplate: string;
 }
 
 // An instant, in-place enquiry form — cylib's own real pattern, inspected
@@ -53,10 +61,9 @@ export interface EnquiryModalProps {
 // plain conditional return, not a keyed swap), so entrance-only `motion`
 // props are enough and there's no exit state to get stuck on.
 //
-// Submits to /api/contact — the same Next.js route (proxying to the RMS
-// backend) that src/components/contact/ContactForm.tsx uses — with `topic`
-// and `company` folded into the message body so every contextual enquiry
-// still reaches the company's inbox with its context intact.
+// Submission is UI-only for now (no backend wired up yet) — confirmed with
+// the site owner as the right first step before building real form
+// handling across every contextual CTA on the site.
 export function EnquiryModal({
   open,
   onClose,
@@ -68,10 +75,11 @@ export function EnquiryModal({
   highlightColor,
   description,
   topic,
+  messageTemplate,
 }: EnquiryModalProps) {
   const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // `tone` matches RecycledMaterial.textOn's convention exactly: "light"
   // means light (white) text is what reads on `panelColor`, i.e. the panel
   // itself is dark. Getting this backwards makes a dark panel render with
@@ -87,8 +95,7 @@ export function EnquiryModal({
   useEffect(() => {
     if (!open) return;
     setSubmitted(false);
-    setSubmitting(false);
-    setError("");
+    setError(null);
     const id = requestAnimationFrame(() => firstFieldRef.current?.focus());
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -107,43 +114,15 @@ export function EnquiryModal({
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const form = e.currentTarget;
-    const data = new FormData(form);
-
-    // Honeypot — real visitors never fill this (it's hidden off-screen).
-    if ((data.get("hp_field") as string)?.trim()) {
-      setSubmitted(true);
-      return;
-    }
-
-    setSubmitting(true);
-    setError("");
-    const company = (data.get("company") as string)?.trim();
-    const note = (data.get("message") as string)?.trim();
+    setSending(true);
+    setError(null);
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: data.get("name"),
-          email: data.get("email"),
-          phone: data.get("phone"),
-          message: [`Enquiry: ${topic}`, company && `Company: ${company}`, note]
-            .filter(Boolean)
-            .join("\n"),
-          source_url: window.location.href,
-        }),
-      });
-      const json = await res.json().catch(() => null);
-      if (!res.ok || json?.error) {
-        setError(json?.error || "Something went wrong. Please try again.");
-        return;
-      }
+      await submitEnquiry(enquiryFromForm(e.currentTarget, topic));
       setSubmitted(true);
-    } catch {
-      setError("Could not send your enquiry. Please check your connection and try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
-      setSubmitting(false);
+      setSending(false);
     }
   }
 
@@ -198,7 +177,7 @@ export function EnquiryModal({
             <button
               type="button"
               onClick={onClose}
-              className="mt-8 rounded-full px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
+              className="mt-8 rounded-lg px-6 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ background: "var(--brand-deep-2)" }}
             >
               Close
@@ -214,6 +193,36 @@ export function EnquiryModal({
               {heading} <span style={{ color: resolvedHighlight }}>{headingAccent}.</span>
             </h3>
             <p className={`mt-3 max-w-lg text-sm ${mutedTextClass}`}>{description}</p>
+
+            {/* A faster path than the form for someone who'd rather just
+                talk — real number, real WhatsApp link, not a form-only
+                dead end. */}
+            <div className={`mt-4 flex flex-wrap items-center gap-2 text-xs ${mutedTextClass}`}>
+              <span>Prefer to talk?</span>
+              <a
+                href={`tel:+${PHONE_DIGITS}`}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition-colors ${fieldBgClass} text-ink hover:opacity-80`}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"
+                    fill="currentColor"
+                  />
+                </svg>
+                Call {CONTACT_INFO.phone}
+              </a>
+              <a
+                href={`https://wa.me/${PHONE_DIGITS}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-medium transition-colors ${fieldBgClass} text-ink hover:opacity-80`}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.1 8.1 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8.9-.2.2-.3.2-.5.1-.2-.1-1-.4-1.9-1.2-.7-.6-1.2-1.4-1.3-1.6-.1-.2 0-.4.1-.5l.4-.4c.1-.1.2-.3.2-.4.1-.1 0-.3 0-.4-.1-.1-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.4c.1.2 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.3-.5 1.5-1 .2-.5.2-.9.1-1z" />
+                </svg>
+                WhatsApp
+              </a>
+            </div>
 
             {/* A wide rectangle, two-column layout — cylib's own real form
                 shape: a stacked column of short fields on the left, a
@@ -262,23 +271,13 @@ export function EnquiryModal({
                   Enquiry about {topic}
                 </div>
                 <textarea
+                  key={messageTemplate}
                   name="message"
-                  placeholder={`Tell us a little about your ${topic.toLowerCase()} enquiry...`}
+                  defaultValue={messageTemplate}
                   aria-label="Message"
                   className={`min-h-[128px] flex-1 resize-none rounded-[20px] px-5 py-3.5 text-sm text-ink outline-none placeholder:text-grey-500 ${fieldBgClass}`}
                 />
               </div>
-
-              {/* Honeypot — visually and semantically hidden from real visitors. */}
-              <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
-                <input name="hp_field" type="text" tabIndex={-1} autoComplete="off" />
-              </div>
-
-              {error && (
-                <p className={`text-sm lg:col-span-2 ${useLightText ? "text-red-300" : "text-red-600"}`} role="alert">
-                  {error}
-                </p>
-              )}
 
               <label className={`flex items-start gap-2.5 text-xs lg:col-span-2 ${mutedTextClass}`}>
                 <input
@@ -296,21 +295,30 @@ export function EnquiryModal({
                 </span>
               </label>
 
-              {/* Same pill anatomy as ContactButton/EnquiryButton (3px
-                  padding, white circle mark badge, label) — cylib's own
-                  submit control reuses their site-wide CTA button too,
+              {/* Same square-edged anatomy as ContactButton/EnquiryButton
+                  (3px padding, white square mark badge, label) — cylib's
+                  own submit control reuses their site-wide CTA button too,
                   rather than a plain flat rectangle. */}
+              {/* Honeypot for bots — hidden from people and assistive tech. */}
+              <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" />
+
+              {error && (
+                <p role="alert" className={`rounded-2xl px-4 py-2.5 text-sm text-red-700 lg:col-span-2 ${fieldBgClass}`}>
+                  {error}
+                </p>
+              )}
+
               <button
                 type="submit"
-                disabled={submitting}
-                className="group relative mt-2 flex w-fit items-center rounded-full p-[3px] text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-70 lg:col-span-2"
+                disabled={sending}
+                className="disabled:cursor-wait disabled:opacity-70 group relative mt-2 flex w-fit items-center rounded-lg p-[3px] text-sm font-medium text-white transition-transform duration-200 hover:scale-[1.02] lg:col-span-2"
                 style={{ background: "var(--brand-deep-2)" }}
               >
                 <GlowAura />
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white">
                   <Mark size={18} color="var(--brand-deep-2)" />
                 </span>
-                <span className="px-4">{submitting ? "Sending…" : "Get in touch"}</span>
+                <span className="px-4">{sending ? "Sending…" : "Send enquiry"}</span>
               </button>
             </form>
           </div>

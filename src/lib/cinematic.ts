@@ -18,11 +18,10 @@ export interface CinematicMaterial {
 }
 
 export const CINEMATIC_MATERIALS: CinematicMaterial[] = [
-  { id: "lithium", name: "Lithium", image: "/images/products/cinematic/lithium.webp", x: 0, y: -27, order: 0 },
-  { id: "graphite", name: "Graphite", image: "/images/products/cinematic/graphite.webp", x: 31, y: -9, order: 1 },
+  { id: "lithium", name: "Lithium", image: "/images/products/cinematic/lithium.webp", x: -19, y: -22, order: 0 },
+  { id: "graphite", name: "Graphite", image: "/images/products/cinematic/graphite.webp", x: 19, y: -22, order: 1 },
   { id: "cobalt", name: "Cobalt", image: "/images/products/cinematic/cobalt.webp", x: 19, y: 22, order: 2 },
-  { id: "manganese", name: "Manganese", image: "/images/products/cinematic/manganese.webp", x: -19, y: 22, order: 3 },
-  { id: "nickel", name: "Nickel", image: "/images/products/cinematic/nickel.webp", x: -31, y: -9, order: 4 },
+  { id: "nickel", name: "Nickel", image: "/images/products/cinematic/nickel.webp", x: -19, y: 22, order: 3 },
 ];
 
 // Scroll choreography, as fractions of the pinned track's total progress —

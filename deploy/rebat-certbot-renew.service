@@ -1,0 +1,13 @@
+# Renews the ReBAT IP-address certificate (Let's Encrypt short-lived, ~6 days).
+# Installed at /etc/systemd/system/rebat-certbot-renew.service
+[Unit]
+Description=Renew ReBAT IP certificate
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/ubuntu/rebat/certbot-venv/bin/certbot renew --quiet \
+  --config-dir /etc/letsencrypt-rebat \
+  --work-dir /var/lib/letsencrypt-rebat \
+  --logs-dir /var/log/letsencrypt-rebat \
+  --deploy-hook "systemctl reload nginx"

@@ -5,7 +5,7 @@ export function GlowAura() {
   return (
     <span
       aria-hidden="true"
-      className="pointer-events-none absolute -inset-2.5 -z-10 rounded-full opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-60"
+      className="pointer-events-none absolute -inset-2.5 -z-10 rounded-lg opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-60"
       style={{
         background:
           "linear-gradient(90deg, var(--gold), var(--brand-hover) 45%, var(--brand) 75%, var(--gold))",

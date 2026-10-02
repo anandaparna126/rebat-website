@@ -7,7 +7,7 @@ import { EnquiryModal } from "@/components/ui/EnquiryModal";
 import { APPLICATION_LABEL, RECYCLED_MATERIALS, type RecycledMaterial } from "@/lib/products";
 
 const N = RECYCLED_MATERIALS.length;
-const AUTO_MS = 5500;
+const AUTO_MS = 4500;
 const PAUSE_MS = 6000;
 
 // A product carousel that auto-advances on a timer, pausing on hover/drag/
@@ -31,12 +31,39 @@ export function RecoveredMaterialsCarousel({
   const [enquiryOpen, setEnquiryOpen] = useState(false);
   const pauseTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dragStartX = useRef<number | null>(null);
+  const railRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const material = RECYCLED_MATERIALS[index];
 
   useEffect(() => {
     onActiveChange?.(material);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [material.id]);
+
+  useEffect(() => {
+    const i = RECYCLED_MATERIALS.findIndex((m) => m.id === window.location.hash.slice(1));
+    if (i >= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIndex(i);
+      pauseBriefly();
+      // A visitor arriving via a deep link (e.g. from the homepage's "View
+      // in Products") should land on this section, not the top of the page.
+      requestAnimationFrame(() => sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const rail = railRef.current;
+    const el = rail?.querySelector<HTMLElement>('[aria-current="true"]');
+    if (!rail || !el || rail.scrollWidth <= rail.clientWidth) return;
+    rail.scrollTo({ left: el.offsetLeft - rail.clientWidth / 2 + el.clientWidth / 2, behavior: "smooth" });
+  }, [index]);
+
+  function select(i: number) {
+    goTo(i);
+    window.history.replaceState(null, "", `#${RECYCLED_MATERIALS[i].id}`);
+  }
 
   function pauseBriefly() {
     setPaused(true);
@@ -92,8 +119,6 @@ export function RecoveredMaterialsCarousel({
     else pauseBriefly();
   }
 
-  const prevMaterial = RECYCLED_MATERIALS[(index - 1 + N) % N];
-  const nextMaterial = RECYCLED_MATERIALS[(index + 1) % N];
   const applicationLabel = material.application ? APPLICATION_LABEL[material.application] : undefined;
   const useLightText = material.textOn === "light";
   const dividerClass = useLightText ? "border-white/15" : "border-black/10";
@@ -106,7 +131,7 @@ export function RecoveredMaterialsCarousel({
   const cardClass = useLightText ? "bg-white/10 backdrop-blur-sm" : "bg-black/[0.06] backdrop-blur-sm";
 
   return (
-    <div className="mx-auto max-w-[1328px] px-[5vw]">
+    <div ref={sectionRef} className="mx-auto max-w-[1328px] px-[5vw]">
       {/* The whole slide sits on the material's own real colour (its
           gradient from lib/products.ts) — a large rounded tile, not a
           plain white background, so the product's own tone carries
@@ -124,17 +149,31 @@ export function RecoveredMaterialsCarousel({
           {/* Image — the product stays the dominant visual element; a plain
               crossfade on change, no slide/scale drama. */}
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl shadow-[0_40px_80px_-24px_rgba(0,0,0,0.35)] select-none lg:aspect-[5/4]">
-            <motion.img
-              key={material.id}
-              src={material.image}
-              alt={material.name}
-              draggable={false}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-              className="absolute inset-0 h-full w-full object-cover"
-              style={{ objectPosition: material.imagePosition ?? "center" }}
-            />
+            {material.image ? (
+              <motion.img
+                key={material.id}
+                src={material.image}
+                alt={material.name}
+                draggable={false}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <motion.div
+                key={material.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className={`absolute inset-0 flex flex-col items-center justify-center gap-2 border border-dashed text-center ${
+                  useLightText ? "border-white/25 text-white/60" : "border-grey-900/15 text-grey-600"
+                }`}
+              >
+                <span className="text-[11px] font-medium tracking-[0.15em] uppercase opacity-70">Pending</span>
+                <span className="text-xs">Product photography</span>
+              </motion.div>
+            )}
           </div>
 
           {/* Information — a self-contained card in a complementary tone,
@@ -158,10 +197,18 @@ export function RecoveredMaterialsCarousel({
             {/* At a glance — only fields with real data; a thin, spare
                 row strip, not a spec table. */}
             <div className={`mt-8 flex flex-wrap justify-center gap-x-10 gap-y-3 border-t pt-6 ${dividerClass}`}>
-              <div>
-                <div className={`text-[11px] font-medium tracking-[0.1em] uppercase ${labelClass}`}>Symbol</div>
-                <div className={`mt-1 text-sm font-medium ${useLightText ? "text-white" : "text-ink"}`}>{material.tag}</div>
-              </div>
+              {material.tag !== "—" && (
+                <div>
+                  <div className={`text-[11px] font-medium tracking-[0.1em] uppercase ${labelClass}`}>Symbol</div>
+                  <div className={`mt-1 text-sm font-medium ${useLightText ? "text-white" : "text-ink"}`}>{material.tag}</div>
+                </div>
+              )}
+              {material.purity && (
+                <div>
+                  <div className={`text-[11px] font-medium tracking-[0.1em] uppercase ${labelClass}`}>Purity</div>
+                  <div className={`mt-1 text-sm font-medium ${useLightText ? "text-white" : "text-ink"}`}>{material.purity}</div>
+                </div>
+              )}
               {applicationLabel && (
                 <div>
                   <div className={`text-[11px] font-medium tracking-[0.1em] uppercase ${labelClass}`}>Application</div>
@@ -185,47 +232,54 @@ export function RecoveredMaterialsCarousel({
         </div>
       </div>
 
-      {/* Navigation — previous / current / next only, centered, each
-          material's own colour instead of a generic active/inactive grey.
-          The centre label is the only clear one; its neighbours sit faded
-          on either side so the eye lands on what's actually showing. */}
-      <div className="mt-10 flex items-center justify-center gap-6 border-t border-grey-200 pt-8 sm:gap-12">
-        <button
-          onClick={() => go(-1)}
-          aria-label={`Previous: ${prevMaterial.name}`}
-          className="shrink-0 opacity-35 transition-opacity duration-300 hover:opacity-70"
-        >
-          <span
-            className="text-sm font-medium tracking-[0.04em] uppercase sm:text-base"
-            style={{ color: prevMaterial.glow }}
-          >
-            {prevMaterial.name}
-          </span>
-        </button>
-
-        <motion.span
-          key={material.id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="shrink-0 text-xl font-semibold tracking-[0.04em] uppercase sm:text-2xl"
-          style={{ color: material.glow }}
-        >
-          {material.name}
-        </motion.span>
-
-        <button
-          onClick={() => go(1)}
-          aria-label={`Next: ${nextMaterial.name}`}
-          className="shrink-0 opacity-35 transition-opacity duration-300 hover:opacity-70"
-        >
-          <span
-            className="text-sm font-medium tracking-[0.04em] uppercase sm:text-base"
-            style={{ color: nextMaterial.glow }}
-          >
-            {nextMaterial.name}
-          </span>
-        </button>
+      {/* Every material at once: the tile for the one showing above is
+          lit in its own colour with a thin progress bar toward the next. */}
+      <div ref={railRef} className="relative mt-10 flex gap-3 overflow-x-auto border-t border-grey-200 p-1 pt-8 lg:gap-4">
+        {RECYCLED_MATERIALS.map((m, i) => {
+          const active = i === index;
+          const src = m.squareImage ?? m.image;
+          return (
+            <button
+              key={m.id}
+              type="button"
+              onClick={() => select(i)}
+              aria-label={m.name}
+              aria-current={active}
+              className="group w-[104px] shrink-0 text-left lg:w-auto lg:flex-1"
+            >
+              <span
+                className="relative block aspect-square overflow-hidden rounded-xl transition-shadow duration-500"
+                style={{ background: m.color, boxShadow: active ? `0 0 0 3px ${m.glow}` : "none" }}
+              >
+                {src && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={src}
+                    alt=""
+                    loading="lazy"
+                    draggable={false}
+                    className={`absolute inset-0 h-full w-full object-cover transition duration-500 ${
+                      active ? "scale-105" : "opacity-60 grayscale group-hover:opacity-100 group-hover:grayscale-0"
+                    }`}
+                  />
+                )}
+                {active && !paused && !enquiryOpen && (
+                  <span
+                    key={index}
+                    className="absolute inset-x-0 bottom-0 h-1 origin-left"
+                    style={{ background: m.glow, animation: `tileProgress ${AUTO_MS}ms linear forwards` }}
+                  />
+                )}
+              </span>
+              <span
+                className={`mt-2 block text-[11px] leading-tight font-medium tracking-[0.06em] uppercase transition-colors duration-300 ${active ? "" : "text-grey-500"}`}
+                style={active ? { color: m.glow } : undefined}
+              >
+                {m.name}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <EnquiryModal
@@ -241,6 +295,7 @@ export function RecoveredMaterialsCarousel({
         headingAccent={material.name}
         description={`Tell us a little about your ${material.name.toLowerCase()} sourcing needs and our materials team will get back to you.`}
         topic={material.name}
+        messageTemplate={`Hi, I'd like to know more about sourcing ${material.name.toLowerCase()} from ReBAT. Could you share availability, specifications and pricing?`}
       />
     </div>
   );

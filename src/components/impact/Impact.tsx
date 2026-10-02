@@ -1,151 +1,102 @@
 import { Reveal } from "@/components/ui/Reveal";
-import { Grain } from "@/components/ui/Grain";
-import { IMPACT_ITEMS, type ImpactItem } from "@/lib/content";
+import { StatCounter } from "@/components/impact/StatCounter";
+import { IMPACT_ITEMS } from "@/lib/content";
 
-// Editorial composition, not a card grid: one dramatically tall cell for the
-// "80%" statement, four standard cells beside it, and a full-bleed cell for
-// "Nothing Ends Here." Layout config only — content stays in content.ts.
-// `gridClass` values are literal (not template-built) so Tailwind's static
-// scanner can find them.
-const LAYOUT: {
-  gridClass: string;
-  slot: "tall" | "banner" | "standard";
-}[] = [
-  // 01 — tall, two-row cell, column 1. "80%" stays the most dominant piece.
-  // Row-height clamps trimmed ~18% from the previous pass so it anchors the
-  // composition without dominating it.
-  { gridClass: "md:col-span-2 lg:[grid-column:1/2] lg:[grid-row:1/3]", slot: "tall" },
-  // 02 — standard, row 1
-  { gridClass: "md:col-span-1 lg:[grid-column:2/3] lg:[grid-row:1/2]", slot: "standard" },
-  // 03 — standard, row 1
-  { gridClass: "md:col-span-1 lg:[grid-column:3/4] lg:[grid-row:1/2]", slot: "standard" },
-  // 04 — full-width cell, closing row. Given the exact same treatment as
-  // every other panel (padded artwork, soft vignette, continuous colour
-  // field) so it reads as the collection's fourth piece, not a banner.
-  { gridClass: "md:col-span-2 lg:[grid-column:1/4] lg:[grid-row:3/4]", slot: "banner" },
-  // 05 — standard, row 2
-  { gridClass: "md:col-span-1 lg:[grid-column:3/4] lg:[grid-row:2/3]", slot: "standard" },
-  // 06 — standard, row 2
-  { gridClass: "md:col-span-1 lg:[grid-column:2/3] lg:[grid-row:2/3]", slot: "standard" },
+// Bento photo grid, following cylib's own "In a nutshell" structure
+// (inspected live: white rounded photo cards, a plain caption below the
+// photo — no colour-blocked panels) on this site's own warm yellow-toned
+// backdrop instead of cylib's dark one; a soft shadow keeps the white
+// cards separated from the light background.
+//
+// Row 1 is the opening banner (Central India's Pioneer, full width).
+// Rows 2-3 are the remaining 5 cards — one tall card (spans two rows),
+// two standard cards, one wide card. `gridClass` values are literal so
+// Tailwind's static scanner can find them.
+const LAYOUT: string[] = [
+  // 01 — opening banner, full width
+  "md:col-span-2 lg:[grid-column:1/4] lg:[grid-row:1/2]",
+  // 02 — tall, LEFT column, rows 2-3, so the strongest quantified claim
+  // (95%) is both the most prominent cell and the first one read
+  // left-to-right, ahead of 73% and 26%.
+  "md:col-span-2 lg:[grid-column:1/2] lg:[grid-row:2/4]",
+  // 03 — standard, row 2
+  "md:col-span-1 lg:[grid-column:2/3] lg:[grid-row:2/3]",
+  // 04 — standard, row 2
+  "md:col-span-1 lg:[grid-column:3/4] lg:[grid-row:2/3]",
+  // 05 — wide, row 3, columns 2-3 (shifted right so it doesn't collide
+  // with the tall card now occupying column 1 through row 3).
+  "md:col-span-2 lg:[grid-column:2/4] lg:[grid-row:3/4]",
 ];
-
-function hexToRgb(hex: string) {
-  const n = parseInt(hex.replace("#", ""), 16);
-  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
-}
-
-function ImpactPanel({ item }: { item: ImpactItem }) {
-  const light = item.textColor === "light";
-  const rgb = hexToRgb(item.panelSolid);
-  const isStat = item.number === "01";
-  return (
-    // No outer card boundary (no border, shadow, or full-panel radius) —
-    // the panel is one continuous colour field; whitespace (the grid gap)
-    // separates it from its neighbours, not a visible edge. A faint radial
-    // catch-light adds tonal variation without reading as an "effect."
-    <div
-      className="group relative flex h-full flex-col"
-      style={{ background: `radial-gradient(140% 90% at 28% -8%, rgba(255,255,255,0.16), transparent 55%), ${item.gradient}` }}
-    >
-      {/* The artwork sits inset within its own field (a "mat," not a
-          full-bleed rectangle) — several of the source images already carry
-          their own matching matte border, so this lets that show through
-          naturally instead of cropping it away. */}
-      <div className="relative flex-1 p-4 sm:p-5">
-        <div className="relative h-full w-full overflow-hidden rounded-lg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={item.image}
-            alt={item.imageAlt}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            style={{ objectPosition: item.objectPosition }}
-          />
-          {/* Soft vignette on every edge, blending the artwork into the
-              panel's own colour on all sides, not just where it meets the
-              text below. */}
-          <div className="pointer-events-none absolute inset-0" style={{ boxShadow: `inset 0 0 60px 16px rgba(${rgb}, 0.55)` }} />
-          {/* A stronger fade at the very bottom keeps the text zone clean. */}
-          <div
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2"
-            style={{ background: `linear-gradient(to bottom, rgba(${rgb}, 0) 0%, rgba(${rgb}, 0.92) 100%)` }}
-          />
-        </div>
-      </div>
-
-      <div className="relative -mt-2 px-5 pb-5 sm:px-6 sm:pb-6">
-        {isStat ? (
-          <>
-            <div className="text-4xl leading-none font-bold sm:text-5xl" style={{ color: "var(--brand)" }}>
-              80%
-            </div>
-            <div className="mt-1.5 text-lg font-bold sm:text-xl" style={{ color: "var(--ink)" }}>
-              Lower Carbon Footprint
-            </div>
-          </>
-        ) : (
-          <h3 className="text-lg leading-snug font-bold text-balance sm:text-xl" style={{ color: light ? "#F5F1E8" : "var(--ink)" }}>
-            {item.title}
-          </h3>
-        )}
-        <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed" style={{ color: light ? "rgba(245,241,232,0.72)" : "var(--body-c)" }}>
-          {item.description}
-        </p>
-      </div>
-    </div>
-  );
-}
 
 export function Impact() {
   return (
-    // Same technique as Description/ProcessLoop: this wrapper carries the
-    // next section's color (Products, surface-stone) so it shows through
-    // the notch left by the rounded-bottom corners, instead of white.
-    <div className="bg-surface-stone">
-      <section
-        className="relative overflow-hidden rounded-b-[32px] px-[5vw] py-20"
-        style={{
-          // Layered on top of the section's own gradient: a soft fade from
-          // ProcessLoop's own ending mint tone (#F3FBF7), so the seam where
-          // that section's rounded-bottom card meets this one reads as a
-          // continuous blend instead of a hard, sudden-looking cut.
-          background:
-            "linear-gradient(180deg, #F3FBF7 0%, rgba(243,251,247,0) 14%), linear-gradient(100deg, #dde3d3 0%, var(--surface-mineral) 50%, #eae1ce 100%)",
-        }}
-      >
-        <Grain opacity={0.05} />
-
-        {/* Dashed orbit lines — reuses the mark's own dashed-loop motif
-            (the circular arc from the logo) rather than a generic pattern.
-            Conceptually tied to "closing the loop," not just decoration. */}
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
-          <circle cx="88%" cy="10%" r="220" fill="none" stroke="var(--brand-deep)" strokeWidth="1.5" strokeDasharray="8 8" opacity="0.14" />
-          <circle cx="6%" cy="95%" r="140" fill="none" stroke="var(--brand-deep)" strokeWidth="1.5" strokeDasharray="8 8" opacity="0.1" />
-        </svg>
-
-        {/* Clean section opener — eyebrow + heading only, generous
-            whitespace beneath. No secondary tagline: the six statements
-            below already carry their own titles and descriptions. */}
-        <Reveal className="relative mb-16">
-          <div className="mb-2 text-2xl font-bold tracking-[0.08em] uppercase" style={{ color: "var(--grey-800)" }}>
-            Impact
-          </div>
-          <h2 className="text-5xl font-bold" style={{ color: "var(--brand-deep)" }}>
-            What closing the loop changes
-          </h2>
-        </Reveal>
-
-        <div className="relative grid grid-cols-1 gap-7 md:grid-cols-2 md:gap-7 lg:grid-cols-3 lg:gap-8 lg:[grid-template-rows:clamp(250px,21vw,320px)_clamp(250px,21vw,320px)_clamp(230px,19vw,280px)]">
-          {IMPACT_ITEMS.map((item, i) => {
-            const layout = LAYOUT[i];
-            return (
-              <Reveal key={item.number} delay={i * 0.05} className={layout.gridClass}>
-                <ImpactPanel item={item} />
-              </Reveal>
-            );
-          })}
+    // Same structural overlap technique as Description/ProcessLoop: pulled
+    // up under ProcessLoop via a negative top margin, staying above
+    // RebatStorySection in z-index so this section's own rounded-bottom
+    // corner reveals RebatStorySection's *real* background through the
+    // notch instead of a manually colour-matched wrapper.
+    <section
+      className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] px-[5vw] py-20"
+      style={{ background: "linear-gradient(100deg, #e2f0ad 0%, var(--surface-yellow) 50%, var(--surface-mineral) 100%)" }}
+    >
+      <Reveal className="relative mb-12">
+        <div className="mb-2 text-2xl font-bold tracking-[0.08em] uppercase" style={{ color: "var(--grey-800)" }}>
+          Impact
         </div>
-      </section>
-    </div>
+        <h2 className="text-4xl font-bold sm:text-5xl" style={{ color: "var(--brand-deep)" }}>
+          Closing the Loop, Changing the Future.
+        </h2>
+      </Reveal>
+
+      <div className="relative grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3 lg:[grid-template-rows:clamp(280px,24vw,340px)_clamp(230px,19vw,290px)_clamp(230px,19vw,290px)]">
+        {IMPACT_ITEMS.map((item, i) => (
+          <Reveal key={item.number} delay={i * 0.05} className={LAYOUT[i]}>
+            <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-white p-2 shadow-[0_18px_40px_-20px_rgba(10,36,28,0.35)]">
+              <div className="relative flex-1 overflow-hidden rounded-xl" style={{ background: item.imageBackground }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={item.image}
+                  alt={item.imageAlt}
+                  loading="lazy"
+                  style={{ objectPosition: item.objectPosition }}
+                  className={`absolute inset-0 h-full w-full transition-transform duration-700 ease-out group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100 ${
+                    item.fit === "contain" ? "object-contain" : "object-cover"
+                  }`}
+                />
+                {/* Only the stat cards need a scrim — it exists purely so
+                    the bold number reads over whatever the photo is doing
+                    underneath it. */}
+                {item.stat && (
+                  <>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/0 to-transparent" />
+                    {item.overlayLabel ? (
+                      <div className="pointer-events-none absolute top-1/2 left-[30%] max-w-[46%] -translate-x-1/2 -translate-y-1/2 text-center">
+                        <span className="block text-2xl leading-[1.1] font-black text-balance text-white sm:text-3xl lg:text-4xl">
+                          {item.overlayLabel}
+                        </span>
+                        <StatCounter stat={item.stat} className="mt-1 block text-4xl leading-none font-bold text-white sm:mt-2 sm:text-5xl" />
+                      </div>
+                    ) : (
+                      <StatCounter
+                        stat={item.stat}
+                        className="absolute bottom-5 left-5 text-4xl leading-none font-bold text-white sm:text-5xl"
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="px-2 pt-4 pb-3">
+                <h3 className="text-xl leading-snug font-black text-balance" style={{ color: "var(--ink)" }}>
+                  {item.heading}
+                </h3>
+                <p className="mt-1.5 text-base leading-relaxed font-medium sm:text-lg" style={{ color: "var(--grey-800)" }}>
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          </Reveal>
+        ))}
+      </div>
+    </section>
   );
 }

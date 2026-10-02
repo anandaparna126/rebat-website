@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Hanken_Grotesk, Fredoka } from "next/font/google";
+import { ScreenshotBlurGuard } from "@/components/ui/ScreenshotBlurGuard";
 import "./globals.css";
 
 const hanken = Hanken_Grotesk({
@@ -28,7 +29,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${hanken.variable} ${rounded.variable}`}>
-      <body className="overflow-x-hidden bg-surface text-body font-sans antialiased">{children}</body>
+      <body className="overflow-x-hidden bg-surface text-body font-sans antialiased">
+        <ScreenshotBlurGuard />
+        {children}
+      </body>
     </html>
   );
 }

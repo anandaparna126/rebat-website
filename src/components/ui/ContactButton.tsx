@@ -20,10 +20,10 @@ export function ContactButton({
     <a
       href={href}
       onClick={onClick}
-      className={`group relative flex items-center rounded-full bg-brand p-[3px] text-sm font-medium text-white transition-colors hover:bg-brand-hover ${className ?? ""}`}
+      className={`group relative flex items-center rounded-lg bg-brand p-[3px] text-sm font-medium text-white transition-colors hover:bg-brand-hover ${className ?? ""}`}
     >
       <GlowAura />
-      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white">
+      <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white">
         <Mark size={18} color="var(--brand)" />
       </span>
       <span className="px-3">{label}</span>

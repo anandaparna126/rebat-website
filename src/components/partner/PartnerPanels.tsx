@@ -16,12 +16,12 @@ import { PARTNER_PANELS } from "@/lib/partner";
 // here; this keeps the same look without double-nesting anchors.
 export function PartnerPanels() {
   return (
-    // Wrapped in the next section's colour (the closing video CTA's
-    // grey-900) so the rounded-bottom notch below reveals that instead of a
-    // flat seam — same technique used at every other section boundary on
-    // the homepage.
-    <div className="bg-grey-900">
-      <section id="explore-panels" className="overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-24">
+    // Structural overlap technique (cylib's own real one, not a manually
+    // colour-matched wrapper): stays above the closing video CTA section in
+    // z-index, which is pulled up underneath it with a negative top
+    // margin, so this section's own rounded corner reveals that section's
+    // *real* background through the notch.
+    <section id="explore-panels" className="relative z-10 overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-24">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-8">
           {PARTNER_PANELS.map((panel, i) => (
             <Reveal key={panel.number} delay={i * 0.08} className="lg:flex-1">
@@ -30,7 +30,7 @@ export function PartnerPanels() {
                 className={`group relative block w-full overflow-hidden rounded-[20px] bg-surface-mineral ${panel.heightClass}`}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img loading="lazy" decoding="async"
+                <img
                   src={panel.image}
                   alt={panel.title}
                   className="absolute inset-0 h-full w-full object-cover transition-transform duration-[750ms] ease-out group-hover:scale-[1.02]"
@@ -44,9 +44,9 @@ export function PartnerPanels() {
                   </h3>
                   <p className="mt-4 max-w-[28ch] text-base text-white/85 sm:text-lg">{panel.description}</p>
 
-                  <span className="group/cta relative mt-7 flex items-center rounded-full bg-brand p-[3px] text-sm font-medium text-white transition-colors group-hover:bg-brand-hover">
+                  <span className="group/cta relative mt-7 flex items-center rounded-lg bg-brand p-[3px] text-sm font-medium text-white transition-colors group-hover:bg-brand-hover">
                     <GlowAura />
-                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-md bg-white">
                       <Mark size={18} color="var(--brand)" />
                     </span>
                     <span className="px-3">{panel.ctaLabel}</span>
@@ -57,6 +57,5 @@ export function PartnerPanels() {
           ))}
         </div>
       </section>
-    </div>
   );
 }

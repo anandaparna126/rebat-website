@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { BATTERY_PRODUCT_LINES, type BatteryProductLine } from "@/lib/products";
+import { BATTERY_PACKS, categoryOf, type BatteryPack } from "@/lib/battery-packs";
 
-// The homepage's own Engineered Energy view — kept deliberately distinct
-// from the /products page's information-first carousel (EngineeredEnergy
-// Carousel.tsx). Same original auto-rotating, drag/wraparound mechanism as
-// the site's Recovered Materials classic carousel.
-const N = BATTERY_PRODUCT_LINES.length;
-const EXTENDED = N > 1 ? [...BATTERY_PRODUCT_LINES.slice(-1), ...BATTERY_PRODUCT_LINES, ...BATTERY_PRODUCT_LINES.slice(0, 1)] : BATTERY_PRODUCT_LINES;
+// The homepage's own Engineered Energy view: deliberately distinct from the
+// /products page's information-first carousel (EngineeredEnergyCarousel.tsx),
+// but showing the same battery pack range. Same original auto-rotating,
+// drag / wraparound sliding mechanism as the site's Recovered Materials
+// classic carousel; light emerald tiles, arrows and dots.
+const N = BATTERY_PACKS.length;
+const EXTENDED = N > 1 ? [...BATTERY_PACKS.slice(-1), ...BATTERY_PACKS, ...BATTERY_PACKS.slice(0, 1)] : BATTERY_PACKS;
 const POS_MIN = 0;
 const POS_MAX = EXTENDED.length - 1;
 const BASE_LOW = 1;
@@ -21,7 +22,6 @@ export function EngineeredEnergyCarouselClassic() {
   const [paused, setPaused] = useState(false);
   const pauseTimeout = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dragStartX = useRef<number | null>(null);
-  const draggedRef = useRef(false);
 
   function pauseBriefly() {
     if (N <= 1) return;
@@ -36,12 +36,14 @@ export function EngineeredEnergyCarouselClassic() {
     pauseBriefly();
   }
 
-  function goTo(lineIndex: number) {
+  function goTo(packIndex: number) {
     if (N <= 1) return;
-    setPos(1 + lineIndex);
+    setPos(1 + packIndex);
     pauseBriefly();
   }
 
+  // Wraparound: after sliding onto a padded clone, snap (with no
+  // transition) to the matching real slide.
   useEffect(() => {
     if (N <= 1 || jump) return;
     if (pos >= POS_MAX || pos <= POS_MIN) {
@@ -70,12 +72,7 @@ export function EngineeredEnergyCarouselClassic() {
   function onPointerDown(e: ReactPointerEvent) {
     if (N <= 1) return;
     dragStartX.current = e.clientX;
-    draggedRef.current = false;
     setPaused(true);
-  }
-  function onPointerMove(e: ReactPointerEvent) {
-    if (dragStartX.current === null) return;
-    if (Math.abs(e.clientX - dragStartX.current) > 6) draggedRef.current = true;
   }
   function onPointerUp(e: ReactPointerEvent) {
     if (dragStartX.current === null) return;
@@ -85,7 +82,7 @@ export function EngineeredEnergyCarouselClassic() {
     else pauseBriefly();
   }
 
-  const activeIndex = ((pos - 1) % N + N) % N;
+  const activeIndex = (((pos - 1) % N) + N) % N;
 
   return (
     <div className="mx-auto max-w-[1800px] px-[3vw]">
@@ -105,7 +102,6 @@ export function EngineeredEnergyCarouselClassic() {
           onMouseEnter={() => setPaused(true)}
           onMouseLeave={() => setPaused(false)}
           onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
         >
           <div
@@ -115,9 +111,9 @@ export function EngineeredEnergyCarouselClassic() {
               transition: jump ? "none" : `transform ${SLIDE_MS}ms cubic-bezier(0.22,1,0.36,1)`,
             }}
           >
-            {EXTENDED.map((line, i) => (
+            {EXTENDED.map((pack, i) => (
               <div key={i} className="w-full shrink-0 px-1">
-                <LineSlide line={line} isActive={i === pos} />
+                <PackSlide pack={pack} />
               </div>
             ))}
           </div>
@@ -136,15 +132,13 @@ export function EngineeredEnergyCarouselClassic() {
 
       {N > 1 && (
         <div className="mt-6 flex justify-center gap-2">
-          {BATTERY_PRODUCT_LINES.map((line, i) => (
+          {BATTERY_PACKS.map((pack, i) => (
             <button
-              key={line.id}
+              key={pack.id}
               onClick={() => goTo(i)}
-              aria-label={`Go to ${line.name}`}
+              aria-label={`Go to ${pack.name}`}
               aria-current={i === activeIndex}
-              className={`h-1.5 rounded-full transition-all ${
-                i === activeIndex ? "w-6 bg-brand" : "w-1.5 bg-grey-200"
-              }`}
+              className={`h-1.5 rounded-full transition-all ${i === activeIndex ? "w-6 bg-brand" : "w-1.5 bg-grey-200"}`}
             />
           ))}
         </div>
@@ -153,66 +147,56 @@ export function EngineeredEnergyCarouselClassic() {
   );
 }
 
-function LineSlide({ line, isActive }: { line: BatteryProductLine; isActive: boolean }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const el = videoRef.current;
-    if (!el) return;
-
-    function tryPlay() {
-      if (!el || document.visibilityState !== "visible") return;
-      el.muted = true;
-      el.play().catch(() => {});
-    }
-
-    if (isActive) {
-      tryPlay();
-      document.addEventListener("visibilitychange", tryPlay);
-      return () => document.removeEventListener("visibilitychange", tryPlay);
-    } else {
-      el.pause();
-    }
-  }, [isActive]);
+function PackSlide({ pack }: { pack: BatteryPack }) {
+  const category = categoryOf(pack);
+  const specs = [
+    { label: "Voltage", value: pack.voltage },
+    { label: "Capacity", value: pack.capacity },
+    { label: "Energy", value: pack.energy },
+    ...(pack.comms ? [{ label: "Comms", value: pack.comms }] : []),
+    ...(pack.specs ?? []),
+  ];
 
   return (
     <div
       className="overflow-hidden rounded-[28px]"
       style={{ background: "linear-gradient(155deg, var(--surface-emerald), var(--surface-emerald-deep))" }}
     >
-      <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 md:gap-8">
-        <div className="flex items-center justify-center p-10 md:p-16">
-          {line.video ? (
-            // eslint-disable-next-line jsx-a11y/media-has-caption
-            <video
-              ref={videoRef}
-              src={isActive ? line.video : undefined}
-              preload={isActive ? "auto" : "none"}
-              muted
-              loop
-              playsInline
-              className="aspect-video w-full max-w-[640px] rounded-2xl object-cover shadow-[0_40px_80px_-24px_rgba(0,0,0,0.25)]"
-            />
-          ) : line.image ? (
-            <div className="relative aspect-video w-full max-w-[640px] overflow-hidden rounded-2xl shadow-[0_40px_80px_-24px_rgba(0,0,0,0.25)]">
+      <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-2 md:gap-8">
+        <div className="flex items-center justify-center p-10 pb-0 md:p-16">
+          {pack.image ? (
+            <div className="relative aspect-[4/5] w-full max-w-[420px] overflow-hidden rounded-2xl bg-white">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img loading="lazy" decoding="async" src={line.image} alt={line.name} className="h-full w-full object-cover" />
+              <img src={pack.image} alt={`ReBAT ${pack.name} battery pack`} draggable={false} className="absolute inset-0 h-full w-full object-contain p-4" />
             </div>
           ) : (
-            <div className="flex aspect-video w-full max-w-[640px] flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-brand-deep/20 p-6 text-center text-brand-deep/60">
-              <span className="text-[11px] font-medium tracking-[0.15em] uppercase opacity-70">Pending</span>
-              <span className="text-xs">Product footage</span>
+            <div className="flex aspect-video w-full max-w-[640px] flex-col items-center justify-center rounded-2xl border border-brand-deep/15 bg-white/40 p-6 text-center">
+              <div className="text-6xl leading-none font-bold text-brand-deep sm:text-7xl lg:text-8xl">{pack.voltage}</div>
+              <div className="mt-4 text-xl font-medium text-brand-deep/70 sm:text-2xl">
+                {pack.capacity} <span className="text-brand-deep/30">/</span> {pack.energy}
+              </div>
             </div>
           )}
         </div>
 
-        <div className="flex flex-col items-start gap-4 p-10 pb-16 text-left md:p-16 md:pb-16">
-          <h3 className="text-3xl font-medium text-brand-deep sm:text-4xl">{line.name}</h3>
-          {line.description ? (
-            <p className="max-w-md text-base text-brand-deep/80">{line.description}</p>
-          ) : (
-            <span className="text-[11px] font-medium tracking-[0.15em] text-brand-deep/50 uppercase">Pending</span>
-          )}
+        <div className="flex flex-col items-start gap-4 p-10 pt-0 text-left md:p-16 md:pl-4">
+          {category && <span className="text-[11px] font-medium tracking-[0.15em] text-brand-deep/55 uppercase">{category.title}</span>}
+          <h3 className="text-3xl font-medium text-brand-deep sm:text-4xl">{pack.productName}</h3>
+          <p className="max-w-md text-base text-brand-deep/80">{pack.description}</p>
+          <dl className="mt-2 flex flex-wrap gap-x-8 gap-y-3 border-t border-brand-deep/15 pt-4">
+            {specs.map((s) => (
+              <div key={s.label}>
+                <dt className="text-[11px] font-medium tracking-[0.1em] text-brand-deep/50 uppercase">{s.label}</dt>
+                <dd className="mt-0.5 text-base font-semibold text-brand-deep">{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <a href={`/products#${pack.id}`} className="group flex items-center gap-1.5 text-sm font-medium text-brand-deep transition-opacity hover:opacity-70">
+            View in Products
+            <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">
+              &rarr;
+            </span>
+          </a>
         </div>
       </div>
     </div>

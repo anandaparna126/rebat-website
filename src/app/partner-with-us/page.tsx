@@ -5,7 +5,6 @@ import { PartnerHero } from "@/components/partner/PartnerHero";
 import { ContactButton } from "@/components/ui/ContactButton";
 import { GetInTouch } from "@/components/cta/GetInTouch";
 import { RECYCLE_HERO } from "@/lib/content";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // The "Partner with us" hub — three audience-segmented entry points
 // (recycle with us / source from us / power with us) rather than the old
@@ -31,14 +30,20 @@ export default function PartnerWithUs() {
 
       {/* Same full-bleed closing-video treatment as the homepage's Products
           section (ProductsClosingCTA): real footage filling the frame, a
-          dark "to top" gradient for legibility, rounded-b-[32px], wrapped in
-          the next section's own colour (GetInTouch's brand green) so the
-          rounded corners reveal that instead of a flat seam. */}
-      <div className="bg-brand">
-        <div className="relative flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
-          <LazyVideo
+          dark "to top" gradient for legibility. Structural overlap
+          technique: pulled up underneath PartnerPanels via a negative top
+          margin, and stays above GetInTouch (passed its own `overlap`
+          prop below) in z-index, so both rounded corners reveal their
+          neighbour's *real* background through the notch instead of a
+          manually colour-matched wrapper. */}
+        <div className="relative z-10 -mt-10 flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
+          <video
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             src="/videos/partner/get-in-touch.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
           />
           <div
             className="pointer-events-none absolute inset-0"
@@ -52,9 +57,8 @@ export default function PartnerWithUs() {
             <ContactButton href="/contact" label="Get in touch" className="mt-10 w-fit" />
           </Reveal>
         </div>
-      </div>
 
-      <GetInTouch />
+      <GetInTouch overlap />
     </PageShell>
   );
 }

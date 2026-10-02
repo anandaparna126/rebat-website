@@ -9,7 +9,7 @@ export function WhatWeTakeIn() {
     <div className="px-[5vw] pt-28 pb-20">
       <Reveal>
         <h2 className="max-w-2xl text-5xl leading-[1.05] font-medium text-ink sm:text-6xl lg:text-7xl">
-          We take in what still holds value.
+          Today&rsquo;s Waste Tomorrow&rsquo;s Future
         </h2>
         <p className="mt-4 max-w-xl text-lg text-body">
           From production scrap to end-of-life batteries, we take in materials that still hold value and give them a path forward.

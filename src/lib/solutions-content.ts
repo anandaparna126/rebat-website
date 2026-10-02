@@ -14,6 +14,7 @@
 //    confirmed by ReBAT before launch)
 
 import type { SolutionModalConfig } from "@/components/solutions/SolutionEnquiry";
+import { PACK_CATEGORIES, TESTING, packsIn } from "@/lib/battery-packs";
 
 export const MODALS = {
   batteryDesign: {
@@ -24,6 +25,7 @@ export const MODALS = {
     headingAccent: "your battery application",
     description: "Tell us what you're trying to power and we'll explore the right battery solution with you.",
     topic: "Battery Design",
+    messageTemplate: "Hi, we're looking to design a battery solution for our application. Could your team help us explore the right approach?",
   },
   reverseLogistics: {
     panelColor: "linear-gradient(150deg, #B9C8C5, #C9D5D2)",
@@ -33,6 +35,7 @@ export const MODALS = {
     headingAccent: "your battery material flow",
     description: "Tell us where your batteries or battery materials are and where they need to go.",
     topic: "Reverse Logistics",
+    messageTemplate: "Hi, we have batteries or battery material that need to move through a reverse logistics pathway. Could you help us plan this?",
   },
   epr: {
     panelColor: "linear-gradient(150deg, #DDD5C4, #EAE4D6)",
@@ -42,6 +45,7 @@ export const MODALS = {
     headingAccent: "your battery responsibility",
     description: "Tell us about your batteries and your responsibility pathway, and we'll take it from there.",
     topic: "EPR",
+    messageTemplate: "Hi, we'd like support with our EPR responsibility for batteries. Could your team walk us through the right pathway?",
   },
   rAndD: {
     panelColor: "linear-gradient(150deg, #343A38, #242826)",
@@ -51,6 +55,7 @@ export const MODALS = {
     headingAccent: "your technology challenge",
     description: "Have a technology or battery challenge worth exploring? Tell us about it.",
     topic: "R&D",
+    messageTemplate: "Hi, we have a battery or technology challenge we'd like to explore with your R&D team. Could we set up a conversation?",
   },
 } satisfies Record<string, SolutionModalConfig>;
 
@@ -67,28 +72,27 @@ export interface LifecycleStep {
 export const LIFECYCLE = {
   eyebrow: "The battery lifecycle",
   headline: "From first design to next life.",
-  intro: "Four capabilities, one lifecycle. Each solution picks up where another leaves off.",
+  intro: "Three capabilities, one lifecycle. Each solution picks up where another leaves off.",
   steps: [
-    { label: "Design", note: "A battery built around its application.", solution: { number: "01", href: "/solutions/battery-design" } },
-    { label: "Use", note: "Powering mobility, storage and industry." },
+    { label: "Design", note: "A battery built around its application." },
+    { label: "Use", note: "Powering farms, street lights, homes and electric vehicles." },
     { label: "Collection", note: "Batteries and scrap reach a collection centre." },
-    { label: "Reverse logistics", note: "Moving batteries back into the resource cycle.", solution: { number: "02", href: "/solutions/reverse-logistics" } },
+    { label: "Reverse logistics", note: "Moving batteries back into the resource cycle.", solution: { number: "01", href: "/solutions/reverse-logistics" } },
     { label: "Recovery", note: "Materials recovered through recycling." },
-    { label: "EPR", note: "Responsibility connected to what physically happens.", solution: { number: "03", href: "/solutions/epr" } },
-    { label: "R&D", note: "Materials, processes and technology explored.", solution: { number: "04", href: "/solutions/r-and-d" } },
+    { label: "EPR", note: "Responsibility connected to what physically happens.", solution: { number: "02", href: "/solutions/epr" } },
+    { label: "R&D", note: "Materials, processes and technology explored.", solution: { number: "03", href: "/solutions/r-and-d" } },
     { label: "Next application", note: "Recovered resources return to use." },
   ] satisfies LifecycleStep[],
 };
 
 // ----------------------------------------------------------------------
 // 01 Battery Design
-// Sources: power.ts (applications, design considerations), products.ts (Battery
-// Pack line), the brochure line "advanced lithium battery packs for EVs, BESS
-// and industrial applications", and the factory flow (pack assembly ->
-// testing -> customers). The six process stages, the validation loop and the
-// lifecycle order are supplied by ReBAT as conceptual stages, not as
-// certified procedures. No chemistries, capacities, voltages, BMS/thermal
-// systems, standards or performance figures appear anywhere on the page.
+// Sources: the Battery Pack Range document (applications, pack specs, testing
+// and QC process, BMS and CAN/UART confirmation; see lib/battery-packs.ts),
+// power.ts (design considerations), and ReBAT's own wording for the six process
+// stages and the validation loop, which describe the design approach rather
+// than a certified procedure. No chemistries, cell makers, standards, warranty
+// or cycle-life figures appear, because none have been supplied.
 export const BATTERY_DESIGN = {
   meta: {
     title: "Battery Design | ReBat",
@@ -108,8 +112,8 @@ export const BATTERY_DESIGN = {
     body: "Every application places different demands on its energy system. Battery design begins by understanding those requirements before defining the system around them.",
     considerations: ["Energy", "Power", "Form", "Environment", "Integration", "Intended use"],
     figure: {
-      src: "/images/story/battery-cells-modules.webp",
-      alt: "Battery cells and modules laid out on a concrete floor beside hand tools",
+      src: "/images/battery/pack-green-top.webp",
+      alt: "A ReBAT battery pack with a green lid, terminal posts and a grey connector lead",
       label: "Application",
     },
   },
@@ -186,14 +190,14 @@ export const BATTERY_DESIGN = {
     eyebrow: "Application-specific",
     headline: "One battery does not fit every application.",
     body: "Battery architecture changes with the environment, operating requirements and system it is designed to support.",
-    // power.ts POWER_APPLICATIONS — the only applications ReBAT states.
-    items: [
-      { title: "Mobility", description: "Advanced lithium battery packs for EVs.", image: "/images/products/cinematic/battery.webp", alt: "A ReBAT battery pack", tile: "light" },
-      { title: "Energy Storage", description: "Battery Energy Storage Systems (BESS).", image: "/images/partner/power.webp", alt: "Racked battery energy storage hardware with copper busbars in an industrial hall", tile: "dark" },
-      { title: "Industrial", description: "Battery packs built for industrial applications.", image: "/images/story/rejected-battery-packs.webp", alt: "A battery pack with busbars and wiring on a workshop floor", tile: "dark" },
-    ],
-    href: "/partner-with-us/power-with-us",
-    cta: "See Power With Us",
+    // Derived from the current real pack range (lib/battery-packs.ts).
+    items: PACK_CATEGORIES.map((c) => ({
+      title: c.title,
+      message: c.message,
+      packs: packsIn(c.id).map((p) => `${p.name} · ${p.energy}`),
+    })),
+    href: "/partner-with-us/power-with-us#range",
+    cta: "See the full range",
   },
   system: {
     eyebrow: "Engineered system",
@@ -201,6 +205,11 @@ export const BATTERY_DESIGN = {
     image: "/images/story/rejected-battery-packs.webp",
     alt: "A battery pack opened to show its cell stack, copper busbars and wiring on a workshop floor",
     note: "Annotations describe what is visible in the photograph. They are not a specification.",
+    // Confirmed by the Battery Pack Range document, but not visible in the photo.
+    beyond: {
+      title: "BMS and communications",
+      description: "Every BMS protection and every pack is verified before dispatch.",
+    },
     // Markers sit at percentage positions of the cropped photograph.
     callouts: [
       { title: "Enclosure", description: "The housing that holds the pack together.", x: 42, y: 30 },
@@ -215,6 +224,7 @@ export const BATTERY_DESIGN = {
     steps: ["Requirement", "Design", "Evaluation", "Refinement", "Solution"],
     loop: "Evaluation feeds back into design until the solution meets the requirement.",
   },
+  testing: TESTING,
   lifecycle: {
     eyebrow: "Part of a larger lifecycle",
     headline: "Designed within a larger battery ecosystem.",
@@ -442,7 +452,7 @@ export const RND = {
       { title: "Processes", description: "From dismantling and separation to hydrometallurgical refining." },
       { title: "Battery technology", description: "Battery architecture, second-life evaluation and application-specific design." },
       { title: "Recovery", description: "Improving material recovery and resource utilisation." },
-      { title: "Applications", description: "Mobility, energy storage and industrial use." },
+      { title: "Applications", description: "Agriculture, street lighting, backup power and electric vehicles." },
     ],
   },
   method: {
@@ -470,9 +480,9 @@ export const RND = {
     // content.ts LOOP_NODES: "Characterisation / Test — ReBAT Hitech Lab".
     body: "Characterisation and testing sit inside the ReBAT flow, at the ReBAT Hitech Lab, where each input is understood before it is routed onward.",
     images: [
-      { src: "/images/solutions/hero.webp", alt: "A workbench with a battery pack, sample vials, microscopes and test equipment" },
-      { src: "/images/story/battery-materials.webp", alt: "Copper, graphite and metal powders laid out on a concrete surface" },
-      { src: "/images/products/recovered/nickel.webp", alt: "Recovered nickel material, close up" },
+      { src: "/images/lab/pipetting.webp", alt: "A technician in a white coat, mask and gloves holding a pipette up to the light" },
+      { src: "/images/lab/analyser-at-pc.webp", alt: "A technician at a computer beside an analyser with an automatic sampler" },
+      { src: "/images/lab/titration.webp", alt: "A technician working at a titration stand on a lab bench" },
     ],
   },
   useful: {

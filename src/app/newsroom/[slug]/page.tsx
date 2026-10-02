@@ -5,37 +5,32 @@ import { PageShell } from "@/components/layout/PageShell";
 import { Grain } from "@/components/ui/Grain";
 import { Reveal } from "@/components/ui/Reveal";
 import { GetInTouch } from "@/components/cta/GetInTouch";
-import { CATEGORY_STYLE, formatArticleDate, getReadingTime } from "@/lib/newsroom";
-import { getPublishedArticle, getPublishedArticles } from "@/lib/newsroomApi";
+import { CATEGORY_STYLE, getReadingTime } from "@/lib/newsroom";
+import { getArticle, getArticles } from "@/lib/api";
 
-// Posts are managed live from /admin (see NewsroomPanel.tsx), so this page
-// renders per-request rather than at build time — a newly published or
-// edited post must show up without a rebuild.
-export const dynamic = "force-dynamic";
+// Articles come from the backend, so any slug published from the admin
+// panel renders on first visit; refetched at most every 30s.
+export const revalidate = 30;
 
 export default async function NewsroomArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = await getPublishedArticle(slug);
+  const [article, all] = await Promise.all([getArticle(slug), getArticles()]);
   if (!article) notFound();
 
-  const all = await getPublishedArticles();
-  const related = all
-    .filter((a) => a.slug !== article.slug)
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
-    .slice(0, 3);
+  const related = all.filter((a) => a.slug !== article.slug).slice(0, 3);
 
   const style = CATEGORY_STYLE[article.category] ?? CATEGORY_STYLE.Blogs;
 
   return (
     <PageShell hideNav>
-      {/* No real photography exists for this article (rebat.in's own blog
-          images are broken site-wide, verified directly — see newsroom.ts),
-          so the header is the category's own colour instead of a stand-in
-          photo. A dark wash is layered on top regardless of the category's
-          own light/dark tone, so the nav's white starting text always has
-          somewhere safe to sit — the tinted cards on the listing page can
-          be light, but this header never is. */}
-      <section className="relative overflow-hidden px-[5vw] pt-[168px] pb-20" style={{ background: style.gradient }}>
+      {/* Always the category's own colour, not the article's real photo —
+          a photo dimmed enough to sit text on top of stops being a photo
+          you can actually see. The real photo instead gets its own
+          undimmed thumbnail spot just below, at full visibility. */}
+      <section
+        className="relative overflow-hidden bg-cover bg-center px-[5vw] pt-[168px] pb-16"
+        style={{ background: style.gradient }}
+      >
         <Nav />
         <div
           className="pointer-events-none absolute inset-0"
@@ -49,7 +44,7 @@ export default async function NewsroomArticlePage({ params }: { params: Promise<
           </div>
           <h1 className="text-4xl leading-[1.15] font-bold text-white sm:text-5xl">{article.title}</h1>
           <p className="mt-6 flex flex-wrap items-center gap-3 text-sm text-white/70">
-            <span>{formatArticleDate(article.publishedAt)}</span>
+            <span>{article.date}</span>
             <span aria-hidden="true">&middot;</span>
             <span>By {article.author}</span>
             <span aria-hidden="true">&middot;</span>
@@ -58,7 +53,31 @@ export default async function NewsroomArticlePage({ params }: { params: Promise<
         </div>
       </section>
 
-      <section className="bg-white px-[5vw] py-20">
+      <section className="bg-white px-[5vw] pt-12">
+        <div className="mx-auto max-w-[860px]">
+          {article.image && (
+            <Reveal>
+              <figure className="relative aspect-video w-full overflow-hidden rounded-2xl bg-grey-100">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={article.image} alt={article.imageAlt ?? ""} className="absolute inset-0 h-full w-full object-cover" />
+              </figure>
+              {article.sourceUrl && (
+                <a
+                  href={article.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+                >
+                  View original post on LinkedIn
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              )}
+            </Reveal>
+          )}
+        </div>
+      </section>
+
+      <section className="bg-white px-[5vw] pb-20">
         <Reveal className="mx-auto max-w-[720px]">
           <div className="space-y-6 text-base leading-relaxed text-grey-700">
             {article.body.map((block, i) => {
@@ -93,6 +112,29 @@ export default async function NewsroomArticlePage({ params }: { params: Promise<
                   </div>
                 );
               }
+              if (block.type === "image") {
+                return (
+                  <figure key={i}>
+                    <div className="relative aspect-video w-full overflow-hidden rounded-2xl bg-grey-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={block.src} alt={block.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                    </div>
+                    {block.caption && <figcaption className="mt-2 text-xs text-grey-500">{block.caption}</figcaption>}
+                  </figure>
+                );
+              }
+              if (block.type === "gallery") {
+                return (
+                  <div key={i} className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {block.images.map((img, j) => (
+                      <figure key={j} className="relative aspect-square overflow-hidden rounded-xl bg-grey-100">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img.src} alt={img.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                      </figure>
+                    ))}
+                  </div>
+                );
+              }
               return null;
             })}
           </div>
@@ -111,15 +153,25 @@ export default async function NewsroomArticlePage({ params }: { params: Promise<
           <div className="mx-auto grid max-w-[860px] grid-cols-1 gap-5 sm:grid-cols-3">
             {related.map((a, i) => {
               const relatedStyle = CATEGORY_STYLE[a.category] ?? CATEGORY_STYLE.Blogs;
+              const light = Boolean(a.image) || relatedStyle.light;
               return (
                 <Reveal key={a.slug} delay={i * 0.05}>
                   <Link
                     href={`/newsroom/${a.slug}`}
-                    className="group block h-full overflow-hidden rounded-2xl p-5 transition-transform duration-300 ease-out hover:-translate-y-1"
-                    style={{ background: relatedStyle.gradient }}
+                    className="group relative block h-full overflow-hidden rounded-2xl p-5 transition-transform duration-300 ease-out hover:-translate-y-1"
+                    style={a.image ? undefined : { background: relatedStyle.gradient }}
                   >
-                    <div className={`text-xs ${relatedStyle.light ? "text-white/60" : "text-ink/50"}`}>{formatArticleDate(a.publishedAt)}</div>
-                    <h4 className={`mt-1.5 text-sm leading-snug font-bold ${relatedStyle.light ? "text-white" : "text-ink"}`}>{a.title}</h4>
+                    {a.image && (
+                      <>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={a.image} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                        <div className="pointer-events-none absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(10,20,18,0.6) 0%, rgba(10,20,18,0.88) 100%)" }} />
+                      </>
+                    )}
+                    <div className="relative">
+                      <div className={`text-xs ${light ? "text-white/60" : "text-ink/50"}`}>{a.date}</div>
+                      <h4 className={`mt-1.5 text-sm leading-snug font-bold ${light ? "text-white" : "text-ink"}`}>{a.title}</h4>
+                    </div>
                   </Link>
                 </Reveal>
               );

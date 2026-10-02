@@ -1,11 +1,9 @@
-// Data for the /partner-with-us/power-with-us page — an application-led
-// battery solutions page, not a product catalogue. Application categories
-// are decomposed from BUSINESS_LINES[0]'s own real brochure line ("Advanced
-// lithium battery packs for EVs, BESS, and industrial applications.") and
-// match the three real `application` values already used on
-// RECYCLED_MATERIALS in lib/products.ts — nothing invented beyond what the
-// brochure already states. Battery product data itself is reused from
-// lib/products.ts (BATTERY_PRODUCT_LINES) rather than duplicated here.
+// Data for the /partner-with-us/power-with-us page: an application-led
+// battery page, not a product catalogue. The applications and the pack range
+// come from the Battery Pack Range document (see lib/battery-packs.ts); the
+// design considerations and deployment stages are ReBAT's own wording.
+
+import { PACK_CATEGORIES } from "@/lib/battery-packs";
 
 export interface PowerApplication {
   number: string;
@@ -13,11 +11,14 @@ export interface PowerApplication {
   description: string;
 }
 
-export const POWER_APPLICATIONS: PowerApplication[] = [
-  { number: "01", title: "Mobility", description: "Advanced lithium battery packs for EVs." },
-  { number: "02", title: "Energy Storage", description: "Battery Energy Storage Systems (BESS)." },
-  { number: "03", title: "Industrial", description: "Battery packs built for industrial applications." },
-];
+// The application categories the current real pack range covers (see
+// lib/battery-packs.ts); the core message for each is the line ReBAT wants
+// a buyer in that application to hear.
+export const POWER_APPLICATIONS: PowerApplication[] = PACK_CATEGORIES.map((c, i) => ({
+  number: String(i + 1).padStart(2, "0"),
+  title: c.title,
+  description: c.message,
+}));
 
 export interface ApplicationFactor {
   title: string;

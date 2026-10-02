@@ -3,23 +3,36 @@
 import { useState } from "react";
 import { Reveal } from "@/components/ui/Reveal";
 import { Grain } from "@/components/ui/Grain";
-import { CERTIFICATIONS, RECOGNITION_CATEGORIES } from "@/lib/content";
+import { AWARDS, CERTIFICATIONS, RECOGNITION_CATEGORIES } from "@/lib/content";
+
+// The real certificate document backing each claim (supplied by the user,
+// 2026-09-30) — EPR's own Registration Certificate for Recycler, and the
+// MP Pollution Control Board's Consent Order (which itself covers both
+// the CPCB R4 recycler authorisation and the Hazardous & Other Waste
+// authorisation, so both cards point at the same document).
+const CERT_BADGE_IMAGES: Record<string, string> = {
+  epr: "/images/certifications/epr-registration.webp",
+  cpcb: "/images/certifications/cto-consent-order.webp",
+  hazardous: "/images/certifications/cto-consent-order.webp",
+};
 
 // Two tabs (Certifications / Awards), not three — "Our Clients" dropped
 // since we have no real client logos to show and no plan to fabricate
 // placeholder ones. Certifications reuses the same real brochure-sourced
-// data as the About page; Awards has no real content yet.
+// data as the About page; Awards is sourced from ReBAT's own LinkedIn
+// posts (see AWARDS in lib/content.ts).
 export function Recognition() {
   const [active, setActive] = useState(RECOGNITION_CATEGORIES[0].id);
 
   return (
-    // Same rounded-corner notch-fill technique as the rest of the site:
-    // wrapped in the next section's colour (Newsroom, surface-edit) so the
-    // rounded-bottom notch reveals that instead of a flat seam.
-    <div className="bg-surface-edit">
+    // Structural overlap technique (cylib's own real one, not a manually
+    // colour-matched wrapper): this section stays above Newsroom in
+    // z-index, and Newsroom is pulled up underneath it with a negative top
+    // margin. Wherever this section's own rounded corner curves away,
+    // Newsroom's *real* background shows through directly.
     <section
       id="recognition"
-      className="relative overflow-hidden rounded-b-[32px] px-[5vw] py-20"
+      className="relative z-10 overflow-hidden rounded-b-[32px] px-[5vw] py-20"
       style={{ background: "linear-gradient(to bottom, var(--surface-clay), var(--surface-clay-mid), var(--surface-clay-mid-2), var(--surface-clay-deep))" }}
     >
       {/* These stops are pale — dark text/cards throughout this section,
@@ -52,21 +65,61 @@ export function Recognition() {
       </div>
 
       {active === "certifications" ? (
-        <div key="certifications" className="relative grid animate-[fadeIn_0.3s_ease] grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {CERTIFICATIONS.map((cert, i) => (
-            <Reveal key={cert.id} delay={i * 0.05} className="rounded-2xl border border-ink/10 bg-white/55 p-6">
-              <h3 className="mb-2 text-base font-bold text-ink">{cert.title}</h3>
-              <p className="text-sm text-ink/70">{cert.description}</p>
+        <div key="certifications" className="relative grid animate-[fadeIn_0.3s_ease] grid-cols-1 gap-4 sm:grid-cols-3">
+          {CERTIFICATIONS.map((cert, i) => {
+            const badge = CERT_BADGE_IMAGES[cert.id];
+            return (
+              <Reveal key={cert.id} delay={i * 0.05} className="overflow-hidden rounded-2xl border border-ink/10 bg-white/55">
+                {badge && (
+                  <a href={badge} target="_blank" rel="noopener noreferrer" className="relative block aspect-[3/4] w-full overflow-hidden bg-white">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={badge} alt={`${cert.title} certificate`} loading="lazy" className="absolute inset-0 h-full w-full object-cover object-top" />
+                  </a>
+                )}
+                <div className="p-6">
+                  <h3 className="mb-2 text-base font-bold text-ink">{cert.title}</h3>
+                  <p className="text-sm text-ink/70">{cert.description}</p>
+                  {badge && (
+                    <a
+                      href={badge}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+                    >
+                      View certificate
+                      <span aria-hidden="true">&rarr;</span>
+                    </a>
+                  )}
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      ) : (
+        <div key="awards" className="relative grid animate-[fadeIn_0.3s_ease] grid-cols-1 gap-4 sm:grid-cols-2">
+          {AWARDS.map((award, i) => (
+            <Reveal key={award.id} delay={i * 0.05} className="overflow-hidden rounded-2xl border border-ink/10 bg-white/55">
+              <div className="relative aspect-video w-full overflow-hidden bg-ink/5">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={award.image} alt={award.title} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+              </div>
+              <div className="p-6">
+                <h3 className="mb-2 text-base font-bold text-ink">{award.title}</h3>
+                <p className="text-sm text-ink/70">{award.description}</p>
+                <a
+                  href={award.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline"
+                >
+                  View post
+                  <span aria-hidden="true">&rarr;</span>
+                </a>
+              </div>
             </Reveal>
           ))}
         </div>
-      ) : (
-        <div key="awards" className="relative animate-[fadeIn_0.3s_ease] rounded-xl border border-dashed border-ink/20 bg-white/40 p-8">
-          <div className="mb-1 text-[11px] font-medium tracking-[0.06em] text-ink/50 uppercase">Pending</div>
-          <p className="text-sm text-ink/70">Awards, recognitions, and milestones — pending.</p>
-        </div>
       )}
     </section>
-    </div>
   );
 }

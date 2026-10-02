@@ -8,9 +8,10 @@ import { EnquiryModal } from "@/components/ui/EnquiryModal";
 import { Reveal } from "@/components/ui/Reveal";
 import { GetInTouch } from "@/components/cta/GetInTouch";
 import { SOURCE_FROM_US_HERO } from "@/lib/content";
+import { PLANT } from "@/lib/plant-photos";
+import { LAB } from "@/lib/lab-photos";
 import { RECYCLED_MATERIALS } from "@/lib/products";
 import { SOURCE_AUDIENCE, SOURCING_REQUIREMENTS, RECOVERED_APPLICATIONS, SOURCING_JOURNEY } from "@/lib/source";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // The "Source from us" pathway's own page — a sourcing/conversion page for
 // businesses who want recovered materials, not a repeat of the homepage's
@@ -35,12 +36,11 @@ export default function SourceFromUs() {
         onCtaClick={() => setEnquiryOpen(true)}
       />
 
-      {/* Who can source from us — wrapped in the next section's colour
-          (surface-mineral) so the rounded-bottom notch reveals that
-          instead of a flat seam, the same technique used at every section
-          boundary on the homepage. */}
-      <div className="bg-surface-mineral">
-        <section className="overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
+      {/* Who can source from us — structural overlap technique: stays
+          above the next section in z-index, which tucks in underneath it
+          via a negative top margin, so this section's own rounded corner
+          reveals that section's *real* background through the notch. */}
+        <section className="relative z-10 overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
           <Reveal className="mx-auto mb-12 max-w-[640px] text-center">
             <h2 className="text-3xl font-medium text-ink sm:text-4xl">For those building what comes next.</h2>
             <p className="mt-4 text-body">
@@ -59,12 +59,43 @@ export default function SourceFromUs() {
             ))}
           </div>
         </section>
-      </div>
 
-      {/* Materials that return to the supply chain — wrapped in white
-          (section 4's colour) for the same rounded-corner reveal. */}
-      <div className="bg-white">
-        <section className="overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
+      {/* Materials that return to the supply chain — same chained overlap:
+          tucked under the section above, stays above the next section. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
+          <Reveal className="mx-auto mb-10 max-w-[720px] text-center">
+            <h2 className="text-3xl font-medium text-ink sm:text-4xl">Where these materials come from.</h2>
+            <p className="mt-4 text-body">Recovered at our own plant, from battery scrap to the materials below.</p>
+          </Reveal>
+          <div className="mx-auto mb-20 grid max-w-[1100px] grid-cols-1 gap-4 sm:grid-cols-[1.4fr_1fr]">
+            {[PLANT.tankPlatformClose, PLANT.workerSample].map((photo, i) => (
+              <Reveal key={photo.src} delay={i * 0.06}>
+                <figure>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-grey-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.src} alt={photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  </div>
+                  <figcaption className="mt-3 text-xs font-medium tracking-[0.1em] text-grey-600 uppercase">{photo.caption}</figcaption>
+                </figure>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal className="mx-auto mb-10 max-w-[720px] text-center">
+            <h2 className="text-3xl font-medium text-ink sm:text-4xl">Analysed in our own lab.</h2>
+          </Reveal>
+          <div className="mx-auto mb-20 grid max-w-[1100px] grid-cols-1 gap-4 sm:grid-cols-2">
+            {[LAB.titration, LAB.analyserAtPc].map((photo, i) => (
+              <Reveal key={photo.src} delay={i * 0.06}>
+                <figure>
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-grey-100">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photo.src} alt={photo.alt} loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+                  </div>
+                  <figcaption className="mt-3 text-xs font-medium tracking-[0.1em] text-grey-600 uppercase">{photo.caption}</figcaption>
+                </figure>
+              </Reveal>
+            ))}
+          </div>
           <Reveal className="mb-10">
             <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">Material portfolio</div>
             <h2 className="max-w-2xl text-3xl font-medium text-ink sm:text-4xl">
@@ -80,13 +111,19 @@ export default function SourceFromUs() {
               <Reveal key={material.id} delay={i * 0.04}>
                 <a href="/products" className="group block">
                   <div className="aspect-square w-full overflow-hidden rounded-2xl bg-grey-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img loading="lazy" decoding="async"
-                      src={material.image}
-                      alt={material.name}
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-                      style={{ objectPosition: material.imagePosition ?? "center" }}
-                    />
+                    {material.image ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={material.squareImage ?? material.image}
+                        alt={material.name}
+                        className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed border-grey-300 text-center text-grey-500">
+                        <span className="text-[11px] font-medium tracking-[0.15em] uppercase opacity-70">Pending</span>
+                        <span className="text-xs">Product photography</span>
+                      </div>
+                    )}
                   </div>
                   <div className="mt-4 flex items-baseline justify-between gap-2">
                     <h3 className="text-base font-bold text-ink">{material.name}</h3>
@@ -100,12 +137,10 @@ export default function SourceFromUs() {
             ))}
           </div>
         </section>
-      </div>
 
-      {/* Built around your material needs — wrapped in surface-mineral
-          (section 5's colour) for the same rounded-corner reveal. */}
-      <div className="bg-surface-mineral">
-        <section className="overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
+      {/* Built around your material needs — same chained overlap: tucked
+          under the section above, stays above the next section. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
           <Reveal className="mb-12 text-center">
             <h2 className="text-3xl font-medium text-ink sm:text-4xl">Built around your material needs.</h2>
           </Reveal>
@@ -124,12 +159,10 @@ export default function SourceFromUs() {
             <EnquiryButton label="Tell us what you're looking for" onClick={() => setEnquiryOpen(true)} className="mx-auto w-fit" />
           </Reveal>
         </section>
-      </div>
 
-      {/* Recovered here. Used again. — wrapped in white (section 6's
-          colour) for the same rounded-corner reveal. */}
-      <div className="bg-white">
-        <section className="overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
+      {/* Recovered here. Used again. — same chained overlap: tucked under
+          the section above, stays above the next section. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
           <Reveal className="mb-10 text-center">
             <h2 className="text-3xl font-medium text-ink sm:text-4xl">
               Recovered here.
@@ -140,19 +173,12 @@ export default function SourceFromUs() {
           <div className="mx-auto grid max-w-[1100px] grid-cols-1 gap-4 sm:grid-cols-2">
             {RECOVERED_APPLICATIONS.map((item, i) => {
               const material = RECYCLED_MATERIALS.find((m) => m.id === item.materialId);
-              if (!material) return null;
+              if (!material || !material.image) return null;
               return (
                 <Reveal key={item.materialId} delay={i * 0.05}>
                   <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      loading="lazy"
-                      decoding="async"
-                      src={material.image}
-                      alt={material.name}
-                      className="absolute inset-0 h-full w-full object-cover"
-                      style={{ objectPosition: material.imagePosition ?? "center" }}
-                    />
+                    <img src={material.image} alt={material.name} className="absolute inset-0 h-full w-full object-cover" />
                     <div
                       className="pointer-events-none absolute inset-0"
                       style={{ background: "linear-gradient(to top, rgba(10,20,18,0.75) 0%, rgba(10,20,18,0.15) 45%, rgba(10,20,18,0) 70%)" }}
@@ -168,13 +194,10 @@ export default function SourceFromUs() {
             })}
           </div>
         </section>
-      </div>
 
-      {/* From recovery to your supply chain — wrapped in the closing video
-          section's own colour (grey-900) for the same rounded-corner
-          reveal. */}
-      <div className="bg-grey-900">
-        <section className="overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
+      {/* From recovery to your supply chain — same chained overlap: tucked
+          under the section above, stays above the closing CTA. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
           <Reveal className="mb-12 text-center">
             <h2 className="text-3xl font-medium text-ink sm:text-4xl">From recovery to your supply chain.</h2>
           </Reveal>
@@ -189,19 +212,21 @@ export default function SourceFromUs() {
             ))}
           </div>
         </section>
-      </div>
 
       {/* Final CTA — same full-bleed video-CTA treatment as the homepage's
           Products section and the other Partner With Us pages: real
           footage filling the frame, a dark "to top" gradient for
-          legibility, rounded-b-[32px], wrapped in the next section's own
-          colour (GetInTouch's brand green) so the rounded corners reveal
-          that instead of a flat seam. */}
-      <div className="bg-brand">
-        <div className="relative flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
-          <LazyVideo
+          legibility. Structural overlap technique: pulled up underneath
+          the section above via a negative top margin, and stays above
+          GetInTouch (passed its own `overlap` prop below) in z-index. */}
+        <div className="relative z-10 -mt-10 flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
+          <video
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             src="/videos/partner/source-closing.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
           />
           <div
             className="pointer-events-none absolute inset-0"
@@ -219,9 +244,8 @@ export default function SourceFromUs() {
             <EnquiryButton label="Start a conversation" onClick={() => setEnquiryOpen(true)} className="mx-auto mt-10 w-fit" />
           </Reveal>
         </div>
-      </div>
 
-      <GetInTouch />
+      <GetInTouch overlap />
 
       <EnquiryModal
         open={enquiryOpen}
@@ -236,6 +260,7 @@ export default function SourceFromUs() {
         headingAccent="sourcing materials"
         description="Tell us what you're looking for. We'll help you find the right material, specification and supply pathway."
         topic="Recovered Materials"
+        messageTemplate="Hi, we're looking to source recovered battery materials. Could you share what's available and the right supply pathway?"
       />
     </PageShell>
   );

@@ -4,6 +4,7 @@ import { SolutionCta, SolutionHero } from "@/components/solutions/SolutionEnquir
 import { Grain } from "@/components/ui/Grain";
 import { Reveal } from "@/components/ui/Reveal";
 import { CERTIFICATIONS } from "@/lib/content";
+import { PLANT } from "@/lib/plant-photos";
 import { EPR as C, MODALS } from "@/lib/solutions-content";
 
 // EPR — lifecycle, responsibility, structured information. Deliberately not a
@@ -29,6 +30,21 @@ export default function EprSolution() {
             <Eyebrow>{C.meaning.eyebrow}</Eyebrow>
             <p className="text-3xl leading-[1.15] font-medium text-ink sm:text-5xl">{C.meaning.statement}</p>
             <p className="mt-10 max-w-[60ch] text-lg leading-relaxed text-grey-600">{C.meaning.body}</p>
+          </Reveal>
+          <Reveal delay={0.1} className="mt-16">
+            <figure>
+              <div className="relative aspect-[16/9] overflow-hidden bg-grey-100 sm:aspect-[21/9]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={PLANT.workerAtTanks.src}
+                  alt={PLANT.workerAtTanks.alt}
+                  loading="lazy"
+                  className="absolute inset-0 h-full w-full object-cover"
+                  style={{ objectPosition: "50% 35%" }}
+                />
+              </div>
+              <figcaption className="mt-3 text-xs font-medium tracking-[0.1em] text-grey-500 uppercase">{PLANT.workerAtTanks.caption}</figcaption>
+            </figure>
           </Reveal>
         </div>
       </section>

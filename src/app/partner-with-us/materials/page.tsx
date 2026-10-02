@@ -1,16 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { PageHero } from "@/components/layout/PageHero";
+import { PartnerHero } from "@/components/partner/PartnerHero";
 import { PageShell } from "@/components/layout/PageShell";
 import { ContactButton } from "@/components/ui/ContactButton";
 import { EnquiryButton } from "@/components/ui/EnquiryButton";
 import { EnquiryModal } from "@/components/ui/EnquiryModal";
 import { Reveal } from "@/components/ui/Reveal";
 import { RECYCLE_MATERIALS_HERO } from "@/lib/content";
+import { MaterialTileMedia } from "@/components/story/MaterialTileMedia";
+import { CollectedGallery } from "@/components/story/CollectedGallery";
 import { INCOMING_MATERIALS } from "@/lib/story";
 import { VALUE_CHAIN_PARTNERS, MATERIALS_JOURNEY, WHAT_HAPPENS_NEXT, MORE_THAN_RECYCLING } from "@/lib/materials";
-import { LazyVideo } from "@/components/ui/LazyVideo";
 
 // The deep-dive page panel 01 ("Recycle with us") on the /partner-with-us
 // hub links to — who we work with, what we accept, the four-stage journey
@@ -27,13 +28,20 @@ export default function PartnerWithUsMaterials() {
   const [enquiryOpen, setEnquiryOpen] = useState(false);
 
   return (
-    <PageShell>
-      <PageHero content={RECYCLE_MATERIALS_HERO} image="/images/partner/recycle.webp">
-        <ContactButton href="/contact" className="mt-8 w-fit" />
-      </PageHero>
+    <PageShell hideNav>
+      <PartnerHero
+        eyebrow={RECYCLE_MATERIALS_HERO.eyebrow}
+        headline={RECYCLE_MATERIALS_HERO.headline}
+        image="/images/partner/recycle.webp"
+        ctaLabel="Get in touch"
+        ctaHref="/contact"
+      />
 
-      {/* Who we work with */}
-      <section className="border-t border-grey-100 bg-white px-[5vw] py-20">
+      {/* Who we work with — structural overlap technique: stays above the
+          next section in z-index, which tucks in underneath it via a
+          negative top margin, so this section's own rounded corner
+          reveals that section's *real* background through the notch. */}
+        <section className="relative z-10 overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
         <Reveal className="mb-10">
           <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">
             Built for the battery value chain
@@ -52,8 +60,10 @@ export default function PartnerWithUsMaterials() {
         </div>
       </section>
 
-      {/* What we accept */}
-      <section className="border-t border-grey-100 bg-white px-[5vw] py-20">
+      {/* What we accept — same chained overlap: tucked under the section
+          above, stays above CollectedGallery (which plays the same dual
+          role for the section after it — see CollectedGallery.tsx). */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
         <Reveal className="mb-10">
           <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">What we accept</div>
           <h2 className="max-w-2xl text-3xl font-medium text-ink sm:text-4xl">
@@ -64,10 +74,7 @@ export default function PartnerWithUsMaterials() {
           {INCOMING_MATERIALS.map((material, i) => (
             <Reveal key={material.number} delay={i * 0.04}>
               <div className="overflow-hidden rounded-2xl border border-grey-200 bg-grey-50">
-                {material.image && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img loading="lazy" decoding="async" src={material.image} alt={material.name} className="h-40 w-full object-cover" />
-                )}
+                <MaterialTileMedia material={material} />
                 <div className="p-5">
                   <h3 className="mb-1.5 text-base font-bold text-ink">{material.name}</h3>
                   <p className="text-sm text-grey-600">{material.description}</p>
@@ -78,8 +85,11 @@ export default function PartnerWithUsMaterials() {
         </div>
       </section>
 
-      {/* From your site to the next life */}
-      <section className="border-t border-grey-100 bg-surface-mineral px-[5vw] py-20">
+      <CollectedGallery rounded />
+
+      {/* From your site to the next life — same chained overlap: tucked
+          under CollectedGallery, stays above the next section. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-surface-mineral px-[5vw] py-20">
         <Reveal className="mb-10 text-center">
           <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">
             From your site to the next life
@@ -89,7 +99,7 @@ export default function PartnerWithUsMaterials() {
           <div className="grid grid-cols-1 gap-1 overflow-hidden rounded-2xl sm:grid-cols-2 lg:grid-cols-4">
             {MATERIALS_JOURNEY.map((stage) => (
               <div key={stage.step} className="aspect-[3/4] w-full overflow-hidden bg-grey-200">
-                <LazyVideo className="h-full w-full object-cover" src={stage.video} />
+                <video className="h-full w-full object-cover" src={stage.video} autoPlay muted loop playsInline />
               </div>
             ))}
           </div>
@@ -108,8 +118,9 @@ export default function PartnerWithUsMaterials() {
         </Reveal>
       </section>
 
-      {/* What happens next */}
-      <section className="border-t border-grey-100 bg-white px-[5vw] py-20">
+      {/* What happens next — same chained overlap: tucked under the
+          section above, stays above the next section. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] bg-white px-[5vw] py-20">
         <Reveal className="mb-10">
           <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">What happens next</div>
         </Reveal>
@@ -127,9 +138,9 @@ export default function PartnerWithUsMaterials() {
         </div>
       </section>
 
-      {/* More than recycling */}
-      <div className="bg-grey-900">
-        <section className="overflow-hidden rounded-b-[32px] border-t border-grey-100 bg-surface-mineral px-[5vw] py-20">
+      {/* More than recycling — same chained overlap: tucked under the
+          section above, stays above the closing video CTA. */}
+        <section className="relative z-10 -mt-10 overflow-hidden rounded-b-[32px] border-t border-grey-100 bg-surface-mineral px-[5vw] py-20">
           <Reveal className="mb-10">
             <div className="mb-2 text-xs font-medium tracking-[0.08em] text-grey-600 uppercase">More than recycling</div>
           </Reveal>
@@ -144,15 +155,28 @@ export default function PartnerWithUsMaterials() {
             ))}
           </div>
         </section>
-      </div>
 
       {/* Closing — same full-bleed video-CTA treatment as the homepage's
-          Products section and the parent /partner-with-us page. */}
+          Products section and the parent /partner-with-us page. Pulled up
+          underneath "More than recycling" via a negative top margin (that
+          section stays above it in z-index) — the same structural overlap
+          technique used above. This section's OWN rounded-bottom corner
+          still uses the old colour-matched wrapper below, deliberately
+          left as-is: it hands off straight to the shared Footer (no
+          GetInTouch on this page), and Footer's own rounded-top corner is
+          a separate, already-solved concern (out of scope here — see
+          Footer.tsx) that a shared negative margin on Footer risks
+          breaking on every other page that goes straight to Footer
+          without a rounded section above it. */}
       <div className="bg-brand">
-        <div className="relative flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
-          <LazyVideo
+        <div className="relative -mt-10 flex min-h-[80vh] items-center overflow-hidden rounded-b-[32px] bg-grey-900 px-[5vw] py-28">
+          <video
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             src="/videos/products/closing-cinematic.mp4"
+            autoPlay
+            muted
+            loop
+            playsInline
           />
           <div
             className="pointer-events-none absolute inset-0"
@@ -182,6 +206,7 @@ export default function PartnerWithUsMaterials() {
         headingAccent="recycling your materials"
         description="Tell us about your production scrap, end-of-life batteries or black mass, and our team will help find the right path for them."
         topic="Recycling & Materials Intake"
+        messageTemplate="Hi, we have production scrap / end-of-life batteries / black mass to recycle. Could you help us find the right intake pathway?"
       />
     </PageShell>
   );

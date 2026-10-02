@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* The admin panel and backend are separate apps living in this repo. */
+@source not "../../admin-panel";
+@source not "../../backend";
+
 :root {
   /* True neutral-grey scale, all derived from the brand emerald's hue (~166°)
      at low saturation — mirrors cylib's own near-achromatic greys instead of
@@ -117,6 +121,15 @@ body {
 }
 
 /* Matches cylib's own tab-switch timing: 300ms fade in, 100ms fade out. */
+@keyframes tileProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

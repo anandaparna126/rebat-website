@@ -13,12 +13,9 @@ export interface RecycledMaterial {
   /** Short chemical-symbol-style tag, e.g. "Li" — purely a visual/editorial
    * device, not a claim about purity or form. */
   tag: string;
-  image: string;
-  /** CSS object-position for `image` — every photo here is a tall portrait
-   * shot cropped into a square/hex frame, so the mound doesn't always sit
-   * dead-centre in frame; this lets a slide shift the crop window instead
-   * of the default 50% 50% cutting off part of the pile. */
-  imagePosition?: string;
+  /** Omitted while a material has no photo yet; UIs show a Pending state. */
+  image?: string;
+  squareImage?: string;
   /** The material's own real, described physical colour (brochure-sourced,
    * e.g. lithium compounds = white powder) — never an invented brand hue. */
   color: string;
@@ -31,6 +28,8 @@ export interface RecycledMaterial {
   textOn: "light" | "dark";
   /** Real, brochure-sourced copy only. Omit rather than invent. */
   description?: string;
+  /** Real, confirmed purity only — omit rather than estimate. */
+  purity?: string;
   application?: "mobility" | "energy-storage" | "industrial";
   /** A short editorial line — the emotional headline for the slide. */
   story?: string;
@@ -42,96 +41,126 @@ export interface RecycledMaterial {
   videoPoster?: string;
 }
 
-// Every entry here has a real photo, real brochure-sourced copy, and a real
-// video — including Copper now that its real photo exists too. Colours are
-// sampled from the actual photos (a few ran different from the brochure's
-// own generic colour descriptions — e.g. cobalt reads as a deep red here,
-// not pink; manganese a pale blush-tan, not lavender; nickel a vivid teal,
-// not green — the real photo is the source of truth over the brochure text
-// when the two disagree on something this visual).
+// ReBAT's recovered materials, in the order ReBAT lists them. Seven have a
+// real photo, brochure-sourced copy and a real video. Aluminium Fraction and
+// Steel Fraction are new: they have no photo or video yet, so they show as
+// Pending. Their descriptions are general statements about what those
+// fractions are in battery recycling (not purity, grade or volume claims) and
+// should be reviewed by ReBAT. Colours for the seven are sampled from the
+// real photos (cobalt reads deep red, nickel vivid teal,
+// not the brochure's generic colours); the two new ones use a
+// plain silver / gunmetal metal tone until real photography exists.
 export const RECYCLED_MATERIALS: RecycledMaterial[] = [
   {
     id: "black-mass",
     name: "Black Mass",
-    tag: "—",
+    tag: "\u2014",
     image: "/images/products/recovered/black-mass.webp",
-    // The pile sits lower in this photo (on a petri dish) than the other
-    // materials' shots — centring the crop (the default) cut its base off.
-    imagePosition: "center 73%",
+    squareImage: "/images/products/recovered/black-mass-sq.webp",
     color: "linear-gradient(155deg, #2a2a28, #050505)",
     glow: "#2a2a28",
     textOn: "light",
     description:
       "The mixed powder recovered during mechanical processing of end-of-life battery scrap, carrying lithium, cobalt, nickel, manganese and graphite values ahead of chemical refining.",
-    story: "From what was lost, we build what comes next.",
+    purity: "> 96.45%",
+    story: "Recovering value from every cell.",
     video: "/videos/products/black-mass.mp4",
   },
   {
+    id: "copper",
+    name: "Copper Fraction",
+    tag: "Cu",
+    image: "/images/products/recovered/copper.webp",
+    squareImage: "/images/products/recovered/copper-sq.webp",
+    color: "linear-gradient(155deg, #c1502f, #7a2f16)",
+    glow: "#c1502f",
+    textOn: "light",
+    description: "Mechanically separated copper recovered from current collectors and internal wiring in battery scrap.",
+    story: "Conducting progress forward.",
+    video: "/videos/products/copper.mp4",
+  },
+  {
+    id: "aluminium",
+    name: "Aluminium Fraction",
+    image: "/images/products/recovered/aluminium.webp",
+    squareImage: "/images/products/recovered/aluminium-jar.webp",
+    tag: "Al",
+    color: "linear-gradient(155deg, #d3d8db, #9aa2a8)",
+    glow: "#9aa2a8",
+    textOn: "dark",
+    description:
+      "Aluminium recovered as a separated fraction during mechanical processing of battery scrap, from sources such as cathode foils and pack casings.",
+    story: "Lightweight by nature. Valuable by design.",
+    video: "/videos/products/aluminium.mp4",
+  },
+  {
+    id: "steel",
+    name: "Steel Fraction",
+    image: "/images/products/recovered/steel.webp",
+    squareImage: "/images/products/recovered/steel-jar.webp",
+    tag: "Fe",
+    color: "linear-gradient(155deg, #5b6670, #2b323a)",
+    glow: "#5b6670",
+    textOn: "light",
+    description:
+      "Steel recovered as a separated fraction during mechanical processing of battery scrap, from sources such as cell cans and pack enclosures.",
+    story: "Strength, recovered and renewed.",
+    video: "/videos/products/steel.mp4",
+  },
+  {
     id: "graphite",
-    name: "Graphite",
+    name: "Graphite Concentrate",
     tag: "C",
     image: "/images/products/recovered/graphite.webp",
+    squareImage: "/images/products/recovered/graphite-sq.webp",
     color: "linear-gradient(155deg, #3a3a3a, #0d0d0d)",
     glow: "#3a3a3a",
     textOn: "light",
     description: "Recovered graphite concentrate from spent battery anodes, separated out during mechanical processing.",
-    story: "Where ideas take shape.",
+    story: "The foundation of modern energy.",
     video: "/videos/products/graphite.mp4",
   },
   {
-    id: "copper",
-    name: "Copper",
-    tag: "Cu",
-    image: "/images/products/recovered/copper.webp",
-    color: "linear-gradient(155deg, #6b4a30, #14100d)",
-    glow: "#b17d4a",
-    textOn: "light",
-    description: "Mechanically separated copper recovered from current collectors and internal wiring in battery scrap.",
-    story: "The thread that keeps the world connected.",
-    video: "/videos/products/copper.mp4",
-  },
-  {
     id: "cobalt",
-    name: "Cobalt",
-    tag: "Co",
+    name: "Cobalt Sulphate",
+    tag: "CoSO\u2084",
     image: "/images/products/recovered/cobalt.webp",
-    color: "linear-gradient(155deg, #d1481f, #5a1209)",
-    glow: "#d1481f",
+    squareImage: "/images/products/recovered/cobalt-sq.webp",
+    color: "linear-gradient(155deg, #c8492f, #7e2417)",
+    glow: "#c8492f",
     textOn: "light",
     description: "Cobalt recovered through hydrometallurgical refining and crystallised as cobalt sulphate.",
-    story: "Made to endure.",
+    purity: "> 99.94%",
+    story: "Precision chemistry, recovered.",
     video: "/videos/products/cobalt.mp4",
   },
   {
     id: "nickel",
-    name: "Nickel",
-    tag: "Ni",
+    name: "Nickel Sulphate",
+    tag: "NiSO\u2084",
     image: "/images/products/recovered/nickel.webp",
-    // The mound sits lower in this particular photo than the other
-    // materials' shots — centring the crop (the default) cut its base off.
-    imagePosition: "center 70%",
-    color: "linear-gradient(155deg, #14d9c4, #0a6b60)",
-    glow: "#14d9c4",
+    squareImage: "/images/products/recovered/nickel-sq.webp",
+    color: "linear-gradient(155deg, #3fc2ab, #1f7d6c)",
+    glow: "#3fc2ab",
     textOn: "light",
     description: "Nickel recovered through hydrometallurgical refining and crystallised as nickel sulphate.",
-    story: "Built for more.",
+    purity: "> 99.94%",
+    story: "Powering high-performance chemistry.",
     video: "/videos/products/nickel.mp4",
   },
   {
     id: "lithium",
-    name: "Lithium",
+    name: "Lithium Compounds",
     tag: "Li",
     image: "/images/products/recovered/lithium.webp",
-    // The pile sits lower in this photo (on a petri dish) than the other
-    // materials' shots — centring the crop (the default) cut its base off.
-    imagePosition: "center 78%",
-    color: "linear-gradient(155deg, #eef2ea, #c7d1c2)",
-    glow: "#a9b8a3",
+    squareImage: "/images/products/recovered/lithium-sq.webp",
+    color: "linear-gradient(155deg, #ffffff, #d8dad9)",
+    glow: "#b9bcc0",
     textOn: "dark",
-    description:
-      "Lithium carbonate and other lithium compounds recovered through hydrometallurgical refining.",
+    description: "Lithium carbonate and other lithium compounds recovered through hydrometallurgical refining.",
+    purity: "99%",
     application: "mobility",
-    story: "One material. Many ways forward.",
+    story: "One element. Endless potential.",
     video: "/videos/products/lithium.mp4",
   },
 ];
@@ -158,25 +187,3 @@ export const APPLICATION_LABEL: Record<NonNullable<RecycledMaterial["application
   "energy-storage": "Energy Storage",
   industrial: "Industrial",
 };
-
-export interface BatteryProductLine {
-  id: string;
-  name: string;
-  /** Real, brochure-sourced copy only. Omit rather than invent. */
-  description?: string;
-  /** Real product footage only. Omit until ReBAT supplies it. */
-  video?: string;
-  /** A real still photo, shown while there's no video yet (never a stock
-   * placeholder). */
-  image?: string;
-}
-
-// Names only, from the brochure's own "Battery Manufacturing" line — no
-// real specs/capacity/chemistry claims exist yet, so `description` stays
-// unset (rendered as a "Pending" note) rather than invented. Battery Pack
-// has one real product photo already (from the earlier cinematic asset
-// batch); Battery Solutions has no real asset at all yet.
-export const BATTERY_PRODUCT_LINES: BatteryProductLine[] = [
-  { id: "battery-pack", name: "Battery Pack", image: "/images/products/cinematic/battery.webp" },
-  { id: "battery-solutions", name: "Battery Solutions" },
-];
