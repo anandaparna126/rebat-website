@@ -60,6 +60,15 @@ export function Footer() {
           ReBAT
         </div>
       </div>
+
+      {/* The Sage Group parent-company lockup, pinned bottom-right. */}
+      <img
+        src="/images/sage-group-white.webp"
+        alt="The Sage Group"
+        width={417}
+        height={357}
+        className="absolute right-[5vw] bottom-4 h-auto w-[clamp(64px,7vw,140px)] select-none"
+      />
     </footer>
     </div>
   );
